@@ -82,9 +82,16 @@ You do not need a local PostgreSQL database for this project if you are using Su
 
 To ingest historical Champions League matches from 2020 onward, configure a football-data.org API token:
 
+1. Create an account at `https://www.football-data.org/`.
+2. Open the football-data.org dashboard/client area.
+3. Copy your API token.
+4. Paste it in `backend/.env`.
+
 ```text
 FOOTBALL_DATA_API_TOKEN=YOUR_FOOTBALL_DATA_ORG_TOKEN
 ```
+
+The token is sent to the API as the `X-Auth-Token` header. Do not invent this value and do not commit it to git.
 
 ## 3. Run backend
 
@@ -171,6 +178,8 @@ If you want historical Champions League data since 2020, also set:
 ```text
 FOOTBALL_DATA_API_TOKEN=YOUR_FOOTBALL_DATA_ORG_TOKEN
 ```
+
+Get that token by registering at `https://www.football-data.org/`. If your plan does not include a historical season, the API can return `403 Restricted Resource`.
 
 After that, install and run the backend:
 

@@ -23,6 +23,8 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 - No local PostgreSQL database is required while using Supabase.
 - WSL may not reach Supabase direct connections because those resolve to IPv6. Prefer Supabase Session Pooler in `DATABASE_URL` for local WSL.
 - Historical Champions League ingestion from 2020 onward uses football-data.org and requires `FOOTBALL_DATA_API_TOKEN`.
+- `FOOTBALL_DATA_API_TOKEN` is obtained by registering at `https://www.football-data.org/`; it is not invented or generated locally.
+- football-data.org can return `403 Restricted Resource` when a season/resource is not available in the user's plan.
 
 ## Supabase SQL scripts
 

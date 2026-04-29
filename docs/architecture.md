@@ -93,3 +93,5 @@ Production scrapers should prefer official APIs or allowed public sources before
 The current Champions League pilot uses a UEFA official snapshot adapter. It is intentionally conservative: it does not crawl pages aggressively and it can be replaced later by an official API or a fully compliant source adapter.
 
 Historical Champions League ingestion from 2020 onward is implemented through football-data.org. The adapter uses the documented `CL` competition code and `season=YYYY` filter, with an API token passed via `FOOTBALL_DATA_API_TOKEN`.
+
+The football-data.org token is obtained by registering at `https://www.football-data.org/`. It is sent as `X-Auth-Token`. Some historical resources may require a paid tier; the backend should surface those errors instead of fabricating data.

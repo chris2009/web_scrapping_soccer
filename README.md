@@ -82,10 +82,11 @@ You do not need a local PostgreSQL database for this project if you are using Su
 
 ```bash
 cd backend
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
 Backend URLs:
@@ -158,10 +159,11 @@ Replace `YOUR_REAL_PASSWORD` with the database password configured in Supabase.
 After that, install and run the backend:
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
 In a second terminal, run the frontend:
@@ -178,6 +180,35 @@ Then open:
 - `http://localhost:8000/health`
 - `http://localhost:8000/docs`
 - `http://localhost:3000`
+
+## WSL Python troubleshooting
+
+If `python` fails with a pyenv message like `pyenv: python: command not found`, select the installed pyenv version first:
+
+```bash
+pyenv local 3.13.0
+python --version
+```
+
+Then create the virtual environment again:
+
+```bash
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/backend
+python -m venv venv
+source venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+If `python3 -m venv venv` says that venv support is missing, install the WSL packages:
+
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip python3-full
+```
+
+Do not install dependencies with system `pip` outside the virtual environment.
 
 ## Current scope
 

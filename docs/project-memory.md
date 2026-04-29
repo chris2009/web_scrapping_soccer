@@ -8,6 +8,7 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 
 - Repository folder: `football-data-app`.
 - User works in WSL/Linux shell. Provide bash commands, not PowerShell commands.
+- User has pyenv in WSL with Python `3.13.0` available. If `python` is not found, use `pyenv local 3.13.0` before creating the virtual environment.
 - Frontend: Next.js with TypeScript, App Router and Tailwind CSS.
 - Backend: Python with FastAPI.
 - Database: Supabase/PostgreSQL.
@@ -49,6 +50,7 @@ Matches are deduplicated by:
 - Update this memory file whenever project context, decisions, setup, architecture or next steps change.
 - Update the relevant README whenever commands, setup, usage or structure change.
 - Use WSL/Linux shell commands in user-facing instructions.
+- For backend Python installs, always use a virtual environment and `python -m pip`, not system `pip`.
 - Do not store real credentials, private keys or secrets in the repository.
 - Keep implementation focused on the current phase unless a new phase is explicitly requested.
 

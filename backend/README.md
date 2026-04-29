@@ -63,11 +63,42 @@ No local PostgreSQL database is required when using Supabase.
 
 ```bash
 cd backend
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+## WSL Python troubleshooting
+
+If WSL shows `pyenv: python: command not found`, pyenv has Python installed but no local/global version selected.
+
+Use:
+
+```bash
+pyenv local 3.13.0
+python --version
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
 ```
+
+If you are not using pyenv and `venv` support is missing:
+
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip python3-full
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+Do not run plain `pip install -r requirements.txt` before activating the virtual environment. Ubuntu blocks system-level pip installs with an `externally-managed-environment` error.
 
 ## Endpoints
 

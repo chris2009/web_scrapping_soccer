@@ -64,13 +64,15 @@ cp .env.example .env
 
 Edit `backend/.env` and set `DATABASE_URL` with your Supabase PostgreSQL connection string.
 
-Use the direct PostgreSQL connection string from Supabase in `DATABASE_URL`:
+For WSL, use the Supabase **Session Pooler** connection string in `DATABASE_URL`:
 
 ```text
-DATABASE_URL=postgresql://postgres:YOUR_REAL_PASSWORD@db.fdnyhwywhrpuhfwfhalj.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
 ```
 
-Do not put this value in `SUPABASE_URL`. `SUPABASE_URL` is the project API URL, usually like:
+Do not use the direct `db.fdnyhwywhrpuhfwfhalj.supabase.co` connection if WSL reports `Network is unreachable`, because that direct host resolves to IPv6.
+
+Do not put the database connection string in `SUPABASE_URL`. `SUPABASE_URL` is the project API URL:
 
 ```text
 SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
@@ -149,13 +151,14 @@ cp .env.example .env
 
 Then edit `backend/.env` and replace `DATABASE_URL` with your Supabase PostgreSQL connection string.
 
-For your Supabase project, the value should look like this:
+For WSL, use the Session Pooler string from Supabase:
 
 ```text
-DATABASE_URL=postgresql://postgres:YOUR_REAL_PASSWORD@db.fdnyhwywhrpuhfwfhalj.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
 ```
 
 Replace `YOUR_REAL_PASSWORD` with the database password configured in Supabase.
+Replace `YOUR_REGION` with the region shown by Supabase in the pooler connection string.
 
 After that, install and run the backend:
 
@@ -212,6 +215,31 @@ sudo apt install -y python3 python3-venv python3-pip python3-full
 ```
 
 Do not install dependencies with system `pip` outside the virtual environment.
+
+## Supabase IPv6 troubleshooting
+
+If `/health` returns `database.configured=true` but `database.connected=false` with `Network is unreachable` and an IPv6 address, your WSL network cannot reach the direct Supabase database host.
+
+Fix it by using the Supabase Session Pooler:
+
+1. Open Supabase Dashboard.
+2. Go to your project.
+3. Click `Connect`.
+4. Choose `Connection pooling`.
+5. Copy the **Session pooler** connection string, port `5432`.
+6. Paste it in `backend/.env` as `DATABASE_URL`.
+
+The Session Pooler format is similar to:
+
+```text
+DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
+```
+
+Keep this separate:
+
+```text
+SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
+```
 
 ## Current scope
 

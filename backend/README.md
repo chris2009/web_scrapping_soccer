@@ -35,7 +35,7 @@ cp .env.example .env
 Required:
 
 ```text
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@YOUR_SUPABASE_HOST:5432/postgres
+DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
 SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 SUPABASE_KEY=YOUR_SUPABASE_ANON_OR_SERVICE_ROLE_KEY
 APP_ENV=development
@@ -43,10 +43,10 @@ LOG_LEVEL=INFO
 ALLOWED_ORIGINS=http://localhost:3000
 ```
 
-For the current Supabase project, use the direct connection string in `DATABASE_URL`:
+For WSL, use the Supabase Session Pooler connection string in `DATABASE_URL`:
 
 ```text
-DATABASE_URL=postgresql://postgres:YOUR_REAL_PASSWORD@db.fdnyhwywhrpuhfwfhalj.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
 ```
 
 `SUPABASE_URL` is not the database connection string. It is the Supabase API URL:
@@ -56,6 +56,8 @@ SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
 ```
 
 No local PostgreSQL database is required when using Supabase.
+
+If `/health` shows `Network is unreachable` with an IPv6 address, the direct connection is not reachable from WSL. Replace `DATABASE_URL` with the Session Pooler connection string from Supabase Dashboard > Connect > Connection pooling.
 
 `SUPABASE_URL` and `SUPABASE_KEY` are placeholders for future use with the official Supabase client. The current persistence layer uses SQLAlchemy and `DATABASE_URL`.
 

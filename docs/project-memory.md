@@ -18,6 +18,7 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 - Supabase direct PostgreSQL connection string belongs in `DATABASE_URL`.
 - `SUPABASE_URL` is the Supabase API URL, not the PostgreSQL connection string.
 - No local PostgreSQL database is required while using Supabase.
+- WSL may not reach Supabase direct connections because those resolve to IPv6. Prefer Supabase Session Pooler in `DATABASE_URL` for local WSL.
 
 ## Supabase SQL scripts
 
@@ -94,6 +95,8 @@ cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app
 Expected backend database configuration:
 
 ```text
-DATABASE_URL=postgresql://postgres:YOUR_REAL_PASSWORD@db.fdnyhwywhrpuhfwfhalj.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
 SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
 ```
+
+Use the exact Session Pooler host and region shown in Supabase Dashboard > Connect > Connection pooling.

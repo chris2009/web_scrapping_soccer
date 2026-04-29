@@ -325,6 +325,14 @@ curl -X POST "http://127.0.0.1:8000/ingestion/champions-league/history/run?start
 
 This requires `FOOTBALL_DATA_API_TOKEN` in `backend/.env`.
 
+If older seasons are restricted by your football-data.org plan, try the latest four season starts:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/ingestion/champions-league/history/run?start_season=2022&end_season=2025"
+```
+
+The response includes `skipped_seasons` for restricted seasons.
+
 Expected result after rerunning ingestion:
 
 - Dashboard table title: `Current pilot matches`.

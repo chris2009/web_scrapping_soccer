@@ -20,6 +20,7 @@ class FootballDataOrgChampionsLeagueScraper(BaseScraper):
     def __init__(self, delay_seconds: float = 1.2) -> None:
         self.delay_seconds = delay_seconds
         self.settings = get_settings()
+        self.skipped_seasons: list[str] = []
 
     def fetch_matches_for_seasons(self, start_season: int = 2020, end_season: int = 2025) -> list[dict[str, Any]]:
         if not self.settings.football_data_api_token:
@@ -34,6 +35,12 @@ class FootballDataOrgChampionsLeagueScraper(BaseScraper):
                 headers={"X-Auth-Token": self.settings.football_data_api_token},
                 timeout=30,
             )
+            if response.status_code == 403:
+                message = self._restricted_message(response, season_start)
+                logger.warning(message)
+                self.skipped_seasons.append(message)
+                time.sleep(self.delay_seconds)
+                continue
             response.raise_for_status()
             payload = response.json()
             all_matches.extend(self._normalize_match(match, season_start) for match in payload.get("matches", []))
@@ -44,6 +51,16 @@ class FootballDataOrgChampionsLeagueScraper(BaseScraper):
 
     def fetch_matches(self) -> list[dict[str, Any]]:
         return self.fetch_matches_for_seasons()
+
+    def _restricted_message(self, response: requests.Response, season_start: int) -> str:
+        try:
+            payload = response.json()
+            api_message = payload.get("message")
+        except ValueError:
+            api_message = response.text
+        if api_message:
+            return f"{season_start}/{season_start + 1}: {api_message}"
+        return f"{season_start}/{season_start + 1}: restricted resource"
 
     def _normalize_match(self, match: dict[str, Any], season_start: int) -> dict[str, Any]:
         score = match.get("score") or {}

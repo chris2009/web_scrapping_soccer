@@ -188,6 +188,14 @@ The backend uses competition code `CL` and the `season` filter supported by foot
 
 If the API returns `403 Restricted Resource`, your football-data.org plan does not allow that specific historical resource. In that case, use a plan/source that allows historical Champions League data.
 
+The backend skips restricted seasons instead of failing the whole range. To try the latest four season starts:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/ingestion/champions-league/history/run?start_season=2022&end_season=2025"
+```
+
+The response includes `skipped_seasons` when football-data.org blocks a season.
+
 ## Ingestion rules
 
 The pilot currently uses a conservative UEFA official snapshot adapter instead of aggressive HTML scraping. Real live sources should be added as new adapters under `app/scrapers/` and must:

@@ -53,7 +53,10 @@ class IngestionService:
     def run_champions_league_ingestion(self) -> dict[str, Any]:
         scraper = ChampionsLeagueMockScraper()
         records = scraper.fetch_matches()
-        return self._ingest_normalized_matches(records=records, source_name=scraper.source_name)
+        return self._ingest_normalized_matches(
+            records=records,
+            source_name=scraper.source_name,
+        )
 
     def run_champions_league_history_ingestion(self, start_season: int = 2020, end_season: int = 2025) -> dict[str, Any]:
         if start_season < 2020:
@@ -65,9 +68,18 @@ class IngestionService:
 
         scraper = FootballDataOrgChampionsLeagueScraper()
         records = scraper.fetch_matches_for_seasons(start_season=start_season, end_season=end_season)
-        return self._ingest_normalized_matches(records=records, source_name=scraper.source_name)
+        return self._ingest_normalized_matches(
+            records=records,
+            source_name=scraper.source_name,
+            skipped_seasons=scraper.skipped_seasons,
+        )
 
-    def _ingest_normalized_matches(self, records: list[dict[str, Any]], source_name: str) -> dict[str, Any]:
+    def _ingest_normalized_matches(
+        self,
+        records: list[dict[str, Any]],
+        source_name: str,
+        skipped_seasons: list[str] | None = None,
+    ) -> dict[str, Any]:
         inserted = 0
         updated = 0
         competition: Competition | None = None
@@ -125,7 +137,8 @@ class IngestionService:
                 "records_inserted": inserted,
                 "records_updated": updated,
                 "status": "success",
-                "message": "Champions League ingestion completed",
+                "message": self._build_ingestion_message(records, skipped_seasons),
+                "skipped_seasons": skipped_seasons or [],
             }
         except Exception as exc:
             logger.exception("Champions League ingestion failed")
@@ -331,3 +344,14 @@ class IngestionService:
             return int(parts[0]), int(parts[1])
         except ValueError:
             return None, None
+
+    def _build_ingestion_message(
+        self,
+        records: list[dict[str, Any]],
+        skipped_seasons: list[str] | None,
+    ) -> str:
+        if skipped_seasons and records:
+            return "Champions League ingestion completed with some restricted seasons skipped"
+        if skipped_seasons and not records:
+            return "Champions League ingestion completed but all requested seasons were restricted"
+        return "Champions League ingestion completed"

@@ -25,6 +25,7 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 - Historical Champions League ingestion from 2020 onward uses football-data.org and requires `FOOTBALL_DATA_API_TOKEN`.
 - `FOOTBALL_DATA_API_TOKEN` is obtained by registering at `https://www.football-data.org/`; it is not invented or generated locally.
 - football-data.org can return `403 Restricted Resource` when a season/resource is not available in the user's plan.
+- The football-data.org history ingestor skips restricted seasons and reports them in `skipped_seasons`.
 
 ## Supabase SQL scripts
 

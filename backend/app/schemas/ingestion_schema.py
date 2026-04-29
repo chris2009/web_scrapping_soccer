@@ -9,4 +9,4 @@ class IngestionResult(BaseModel):
     records_updated: int
     status: str
     message: str
-
+    skipped_seasons: list[str] = []

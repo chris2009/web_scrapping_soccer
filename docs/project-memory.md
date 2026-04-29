@@ -10,6 +10,8 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 - User works in WSL/Linux shell. Provide bash commands, not PowerShell commands.
 - User has pyenv in WSL with Python `3.13.0` available. If `python` is not found, use `pyenv local 3.13.0` before creating the virtual environment.
 - Frontend: Next.js with TypeScript, App Router and Tailwind CSS.
+- Frontend dependencies were upgraded to patched versions. Current target is Next.js `16.2.4`, React `19.2.5`, React DOM `19.2.5`, ESLint `9.39.4`, `eslint-config-next` `16.2.4`, and PostCSS `8.5.12`.
+- Frontend `package.json` uses npm `overrides.postcss=8.5.12` so transitive dependencies do not pull a vulnerable PostCSS version.
 - Backend: Python with FastAPI.
 - Database: Supabase/PostgreSQL.
 - ORM: SQLAlchemy.
@@ -52,6 +54,7 @@ Matches are deduplicated by:
 - Update the relevant README whenever commands, setup, usage or structure change.
 - Use WSL/Linux shell commands in user-facing instructions.
 - For backend Python installs, always use a virtual environment and `python -m pip`, not system `pip`.
+- For frontend installs, use WSL npm only. If Windows npm and WSL npm are mixed, clean `node_modules` and `.next` from WSL and reinstall.
 - Do not store real credentials, private keys or secrets in the repository.
 - Keep implementation focused on the current phase unless a new phase is explicitly requested.
 
@@ -81,6 +84,7 @@ Pending:
 - Install dependencies locally.
 - Start backend and frontend.
 - Push local git repository to GitHub after authentication is available.
+- Run frontend `npm install`, `npm audit`, and `npm run build` from WSL after dependency updates.
 
 ## Next immediate step
 

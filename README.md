@@ -176,6 +176,7 @@ In a second terminal, run the frontend:
 cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/frontend
 cp .env.example .env.local
 npm install
+npm audit
 npm run dev
 ```
 
@@ -215,6 +216,31 @@ sudo apt install -y python3 python3-venv python3-pip python3-full
 ```
 
 Do not install dependencies with system `pip` outside the virtual environment.
+
+## Frontend dependency security
+
+Before compiling or deploying the frontend, run:
+
+```bash
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/frontend
+npm install
+npm audit
+npm run build
+```
+
+The expected audit result is:
+
+```text
+found 0 vulnerabilities
+```
+
+If `npm run build` fails with a permissions error after mixing Windows npm and WSL npm, clean generated dependencies from WSL:
+
+```bash
+rm -rf node_modules .next
+npm install
+npm run build
+```
 
 ## Supabase IPv6 troubleshooting
 

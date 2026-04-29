@@ -51,3 +51,30 @@ http://localhost:3000
 ```
 
 The backend must be running on `http://localhost:8000` for live data.
+
+## Security updates
+
+The project pins patched frontend dependencies and uses an npm `overrides` rule for `postcss`.
+
+Before building, refresh dependencies and audit them:
+
+```bash
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/frontend
+npm install
+npm audit
+npm run build
+```
+
+Expected audit result:
+
+```text
+found 0 vulnerabilities
+```
+
+If dependencies were previously installed from Windows and WSL reports permission issues, remove `node_modules` from WSL and reinstall:
+
+```bash
+rm -rf node_modules .next
+npm install
+npm run build
+```

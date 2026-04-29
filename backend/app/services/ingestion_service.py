@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Competition, Country, DataSource, IngestionLog, Match, Season, Team, Venue
 from app.scrapers.champions_league_scraper import ChampionsLeagueMockScraper
-from app.scrapers.football_data_org_scraper import FootballDataOrgChampionsLeagueScraper
+from app.scrapers.football_data_org_scraper import COMPETITION_CONFIG, FootballDataOrgScraper
 from app.utils.logger import get_logger
 
 
@@ -25,6 +25,10 @@ def slugify(value: str) -> str:
 class IngestionService:
     def __init__(self, db: Session) -> None:
         self.db = db
+
+    # ------------------------------------------------------------------ #
+    # Public entry-points
+    # ------------------------------------------------------------------ #
 
     def reset_and_run_champions_league_ingestion(self) -> dict[str, Any]:
         competition = self.db.scalar(
@@ -56,42 +60,65 @@ class IngestionService:
         return self._ingest_normalized_matches(
             records=records,
             source_name=scraper.source_name,
+            remove_stale_mock=True,
         )
 
-    def run_champions_league_history_ingestion(self, start_season: int = 2020, end_season: int = 2025) -> dict[str, Any]:
-        if start_season < 2020:
-            raise RuntimeError("start_season must be 2020 or later")
-        if end_season < start_season:
-            raise RuntimeError("end_season must be greater than or equal to start_season")
-        if end_season > 2026:
-            raise RuntimeError("end_season cannot be greater than 2026")
+    def run_champions_league_history_ingestion(
+        self, start_season: int = 2020, end_season: int = 2025
+    ) -> dict[str, Any]:
+        return self.run_competition_history_ingestion("CL", start_season, end_season)
 
-        scraper = FootballDataOrgChampionsLeagueScraper()
+    def run_competition_history_ingestion(
+        self, competition_code: str, start_season: int, end_season: int
+    ) -> dict[str, Any]:
+        if competition_code.upper() not in COMPETITION_CONFIG:
+            raise RuntimeError(
+                f"Unknown competition code '{competition_code}'. "
+                f"Valid codes: {', '.join(COMPETITION_CONFIG)}"
+            )
+        scraper = FootballDataOrgScraper(competition_code)
         records = scraper.fetch_matches_for_seasons(start_season=start_season, end_season=end_season)
         return self._ingest_normalized_matches(
             records=records,
             source_name=scraper.source_name,
             skipped_seasons=scraper.skipped_seasons,
+            remove_stale_mock=(competition_code.upper() == "CL"),
         )
+
+    # ------------------------------------------------------------------ #
+    # Core ingestion
+    # ------------------------------------------------------------------ #
 
     def _ingest_normalized_matches(
         self,
         records: list[dict[str, Any]],
         source_name: str,
         skipped_seasons: list[str] | None = None,
+        remove_stale_mock: bool = False,
     ) -> dict[str, Any]:
         inserted = 0
         updated = 0
         competition: Competition | None = None
+        season: Season | None = None
         data_source: DataSource | None = None
 
         try:
             for record in records:
-                competition = self._get_or_create_competition(record["competition"], "champions-league", "Europe")
+                competition = self._get_or_create_competition(
+                    record["competition"],
+                    record.get("competition_slug", slugify(record["competition"])),
+                    record.get("competition_region", "Unknown"),
+                )
                 season = self._get_or_create_season(competition, record["season"])
                 country = self._get_or_create_country(record["country"])
-                home_team = self._get_or_create_team(record["home_team"])
-                away_team = self._get_or_create_team(record["away_team"])
+                home_team = self._get_or_create_team(
+                    record["home_team"],
+                    crest_url=record.get("home_team_crest"),
+                )
+                away_team = self._get_or_create_team(
+                    record["away_team"],
+                    crest_url=record.get("away_team_crest"),
+                )
                 venue = self._get_or_create_venue(record["venue"], country)
                 data_source = self._get_or_create_data_source(
                     record["source_name"],
@@ -114,7 +141,7 @@ class IngestionService:
                 else:
                     updated += 1
 
-            if competition and season:
+            if remove_stale_mock and competition and season:
                 self._remove_stale_champions_league_mock_matches(
                     competition=competition,
                     season=season,
@@ -130,18 +157,19 @@ class IngestionService:
                 records_updated=updated,
             )
             self.db.commit()
+            competition_name = competition.name if competition else "Unknown"
             return {
-                "competition": "Champions League",
+                "competition": competition_name,
                 "source_name": source_name,
                 "records_found": len(records),
                 "records_inserted": inserted,
                 "records_updated": updated,
                 "status": "success",
-                "message": self._build_ingestion_message(records, skipped_seasons),
+                "message": self._build_ingestion_message(competition_name, records, skipped_seasons),
                 "skipped_seasons": skipped_seasons or [],
             }
         except Exception as exc:
-            logger.exception("Champions League ingestion failed")
+            logger.exception("Ingestion failed")
             self.db.rollback()
             self._write_ingestion_log(
                 competition=None,
@@ -155,11 +183,14 @@ class IngestionService:
             self.db.commit()
             raise
 
+    # ------------------------------------------------------------------ #
+    # Entity helpers
+    # ------------------------------------------------------------------ #
+
     def _get_or_create_country(self, name: str) -> Country:
         country = self.db.scalar(select(Country).where(Country.name == name))
         if country:
             return country
-
         country = Country(name=name)
         self.db.add(country)
         self.db.flush()
@@ -169,7 +200,6 @@ class IngestionService:
         competition = self.db.scalar(select(Competition).where(Competition.slug == slug))
         if competition:
             return competition
-
         competition = Competition(name=name, slug=slug, region=region)
         self.db.add(competition)
         self.db.flush()
@@ -184,7 +214,6 @@ class IngestionService:
         )
         if season:
             return season
-
         year_start, year_end = self._parse_season_years(name)
         season = Season(
             competition_id=competition.id,
@@ -196,13 +225,15 @@ class IngestionService:
         self.db.flush()
         return season
 
-    def _get_or_create_team(self, name: str) -> Team:
+    def _get_or_create_team(self, name: str, crest_url: str | None = None) -> Team:
         slug = slugify(name)
         team = self.db.scalar(select(Team).where(Team.slug == slug))
         if team:
+            if crest_url and not team.crest_url:
+                team.crest_url = crest_url
+                self.db.flush()
             return team
-
-        team = Team(name=name, slug=slug)
+        team = Team(name=name, slug=slug, crest_url=crest_url)
         self.db.add(team)
         self.db.flush()
         return team
@@ -213,7 +244,6 @@ class IngestionService:
         )
         if venue:
             return venue
-
         venue = Venue(name=name, country_id=country.id)
         self.db.add(venue)
         self.db.flush()
@@ -223,7 +253,6 @@ class IngestionService:
         data_source = self.db.scalar(select(DataSource).where(DataSource.name == name))
         if data_source:
             return data_source
-
         data_source = DataSource(name=name, base_url=base_url, is_official=False, is_active=True)
         self.db.add(data_source)
         self.db.flush()
@@ -250,7 +279,6 @@ class IngestionService:
                 Match.external_match_id == record["external_match_id"],
             )
         )
-
         if match is None:
             match = self.db.scalar(
                 select(Match).where(
@@ -326,7 +354,6 @@ class IngestionService:
         )
         if not source_ids:
             return
-
         self.db.execute(
             delete(Match).where(
                 Match.competition_id == competition.id,
@@ -347,11 +374,12 @@ class IngestionService:
 
     def _build_ingestion_message(
         self,
+        competition_name: str,
         records: list[dict[str, Any]],
         skipped_seasons: list[str] | None,
     ) -> str:
         if skipped_seasons and records:
-            return "Champions League ingestion completed with some restricted seasons skipped"
+            return f"{competition_name} ingestion completed with some restricted seasons skipped"
         if skipped_seasons and not records:
-            return "Champions League ingestion completed but all requested seasons were restricted"
-        return "Champions League ingestion completed"
+            return f"{competition_name} ingestion completed but all requested seasons were restricted"
+        return f"{competition_name} ingestion completed"

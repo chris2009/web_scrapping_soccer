@@ -6,8 +6,10 @@ export type Match = {
   season_name: string;
   home_team_id: number;
   home_team_name: string;
+  home_team_crest?: string | null;
   away_team_id: number;
   away_team_name: string;
+  away_team_crest?: string | null;
   match_date: string;
   round?: string | null;
   stage?: string | null;
@@ -21,4 +23,3 @@ export type Match = {
   external_match_id?: string | null;
   last_updated_at: string;
 };
-

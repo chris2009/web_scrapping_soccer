@@ -24,6 +24,7 @@ engine = (
         _normalize_database_url(settings.database_url),
         pool_pre_ping=True,
         future=True,
+        connect_args={"prepare_threshold": None},
     )
     if settings.database_url
     else None

@@ -12,23 +12,46 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+COMPETITION_CONFIG: dict[str, dict[str, str]] = {
+    "CL":  {"name": "Champions League", "slug": "champions-league", "region": "Europe"},
+    "EL":  {"name": "Europa League",    "slug": "europa-league",    "region": "Europe"},
+    "PL":  {"name": "Premier League",   "slug": "premier-league",   "region": "England"},
+    "PD":  {"name": "La Liga",          "slug": "la-liga",          "region": "Spain"},
+    "BL1": {"name": "Bundesliga",       "slug": "bundesliga",       "region": "Germany"},
+    "SA":  {"name": "Serie A",          "slug": "serie-a",          "region": "Italy"},
+    "FL1": {"name": "Ligue 1",          "slug": "ligue-1",          "region": "France"},
+}
 
-class FootballDataOrgChampionsLeagueScraper(BaseScraper):
+
+class FootballDataOrgScraper(BaseScraper):
+    BASE_URL = "https://api.football-data.org/v4/competitions/{code}/matches"
     source_name = "football-data.org"
-    source_url = "https://api.football-data.org/v4/competitions/CL/matches"
 
-    def __init__(self, delay_seconds: float = 1.2) -> None:
+    def __init__(self, competition_code: str, delay_seconds: float = 1.2) -> None:
+        config = COMPETITION_CONFIG.get(competition_code.upper())
+        if not config:
+            raise ValueError(
+                f"Unknown competition code '{competition_code}'. "
+                f"Valid codes: {', '.join(COMPETITION_CONFIG)}"
+            )
+        self.competition_code = competition_code.upper()
+        self.competition_config = config
+        self.source_url = self.BASE_URL.format(code=self.competition_code)
         self.delay_seconds = delay_seconds
         self.settings = get_settings()
         self.skipped_seasons: list[str] = []
 
-    def fetch_matches_for_seasons(self, start_season: int = 2020, end_season: int = 2025) -> list[dict[str, Any]]:
+    def fetch_matches_for_seasons(self, start_season: int, end_season: int) -> list[dict[str, Any]]:
         if not self.settings.football_data_api_token:
             raise RuntimeError("FOOTBALL_DATA_API_TOKEN is not configured")
 
         all_matches: list[dict[str, Any]] = []
         for season_start in range(start_season, end_season + 1):
-            logger.info("Fetching Champions League season %s from football-data.org", season_start)
+            logger.info(
+                "Fetching %s season %s from football-data.org",
+                self.competition_config["name"],
+                season_start,
+            )
             response = requests.get(
                 self.source_url,
                 params={"season": season_start},
@@ -36,21 +59,27 @@ class FootballDataOrgChampionsLeagueScraper(BaseScraper):
                 timeout=30,
             )
             if response.status_code == 403:
-                message = self._restricted_message(response, season_start)
-                logger.warning(message)
-                self.skipped_seasons.append(message)
+                msg = self._restricted_message(response, season_start)
+                logger.warning(msg)
+                self.skipped_seasons.append(msg)
                 time.sleep(self.delay_seconds)
                 continue
             response.raise_for_status()
             payload = response.json()
-            all_matches.extend(self._normalize_match(match, season_start) for match in payload.get("matches", []))
+            all_matches.extend(
+                self._normalize_match(match, season_start) for match in payload.get("matches", [])
+            )
             time.sleep(self.delay_seconds)
 
-        logger.info("Collected %s Champions League matches from football-data.org", len(all_matches))
+        logger.info(
+            "Collected %s %s matches from football-data.org",
+            len(all_matches),
+            self.competition_config["name"],
+        )
         return all_matches
 
     def fetch_matches(self) -> list[dict[str, Any]]:
-        return self.fetch_matches_for_seasons()
+        return self.fetch_matches_for_seasons(2023, 2025)
 
     def _restricted_message(self, response: requests.Response, season_start: int) -> str:
         try:
@@ -69,10 +98,14 @@ class FootballDataOrgChampionsLeagueScraper(BaseScraper):
         away_team = match.get("awayTeam") or {}
 
         return {
-            "competition": "Champions League",
+            "competition": self.competition_config["name"],
+            "competition_slug": self.competition_config["slug"],
+            "competition_region": self.competition_config["region"],
             "season": f"{season_start}/{season_start + 1}",
             "home_team": home_team.get("name") or "Unknown home team",
+            "home_team_crest": home_team.get("crest"),
             "away_team": away_team.get("name") or "Unknown away team",
+            "away_team_crest": away_team.get("crest"),
             "match_date": match.get("utcDate"),
             "round": self._format_round(match),
             "stage": self._format_stage(match.get("stage")),
@@ -80,7 +113,7 @@ class FootballDataOrgChampionsLeagueScraper(BaseScraper):
             "home_score": full_time.get("home"),
             "away_score": full_time.get("away"),
             "venue": match.get("venue") or "Unknown venue",
-            "country": "Europe",
+            "country": self.competition_config["region"],
             "source_name": self.source_name,
             "source_url": self.source_url,
             "external_match_id": f"football-data-org-{match.get('id')}",
@@ -112,3 +145,12 @@ class FootballDataOrgChampionsLeagueScraper(BaseScraper):
         if matchday:
             return f"Matchday {matchday}"
         return self._format_stage(match.get("stage"))
+
+
+# Keep backward-compatible alias
+class FootballDataOrgChampionsLeagueScraper(FootballDataOrgScraper):
+    def __init__(self, delay_seconds: float = 1.2) -> None:
+        super().__init__("CL", delay_seconds)
+
+    def fetch_matches_for_seasons(self, start_season: int = 2020, end_season: int = 2025) -> list[dict[str, Any]]:
+        return super().fetch_matches_for_seasons(start_season, end_season)

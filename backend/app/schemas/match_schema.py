@@ -11,8 +11,10 @@ class MatchRead(BaseModel):
     season_name: str
     home_team_id: int
     home_team_name: str
+    home_team_crest: str | None = None
     away_team_id: int
     away_team_name: str
+    away_team_crest: str | None = None
     match_date: datetime
     round: str | None = None
     stage: str | None = None
@@ -25,4 +27,3 @@ class MatchRead(BaseModel):
     source_url: str | None = None
     external_match_id: str | None = None
     last_updated_at: datetime
-

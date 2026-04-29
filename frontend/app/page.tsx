@@ -13,14 +13,15 @@ export default async function DashboardPage() {
     ]);
 
     return (
-      <div className="space-y-6">
-        <section>
-          <p className="text-sm font-semibold uppercase text-accent">Dashboard</p>
-          <h1 className="mt-2 text-3xl font-semibold text-ink">Football match data</h1>
-          <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            Normalized match data collected through the Champions League pilot ingestion flow.
+      <div className="space-y-8">
+        {/* Page header */}
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-accent">Overview</p>
+          <h1 className="mt-1 text-2xl font-bold text-ink">Football Analytics</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Normalized match data across {competitions.length} competition{competitions.length !== 1 ? "s" : ""}.
           </p>
-        </section>
+        </div>
 
         <DashboardCards
           competitions={competitions.length}
@@ -31,7 +32,8 @@ export default async function DashboardPage() {
 
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-ink">Current pilot matches</h2>
+            <h2 className="text-base font-semibold text-ink">Recent matches</h2>
+            <span className="text-xs text-slate-400">Last 8 by date</span>
           </div>
           <MatchesTable matches={matches.slice(0, 8)} />
         </section>
@@ -40,8 +42,8 @@ export default async function DashboardPage() {
   } catch (error) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-semibold text-ink">Football match data</h1>
-        <ErrorState message={`Could not load dashboard data. ${error instanceof Error ? error.message : ""}`} />
+        <h1 className="text-2xl font-bold text-ink">Football Analytics</h1>
+        <ErrorState message={`Could not load dashboard. ${error instanceof Error ? error.message : ""}`} />
       </div>
     );
   }

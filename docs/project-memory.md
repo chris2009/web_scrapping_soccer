@@ -95,35 +95,31 @@ Completed:
 - Frontend root layout uses `suppressHydrationWarning` because browser extensions can add `class="hydrated"` to `<html>` before React hydration.
 - Frontend dependencies were patched and `npm audit` reports `found 0 vulnerabilities`.
 
+- `FOOTBALL_DATA_API_TOKEN` is confirmed working: real Champions League history ingested successfully.
+- `prepare_threshold=None` added to SQLAlchemy engine to fix `DuplicatePreparedStatement` with Supabase PgBouncer.
+- Generic `FootballDataOrgScraper(competition_code)` added — supports CL, EL, PL, PD, BL1, SA, FL1.
+- Generic ingestion endpoint added: `POST /ingestion/{code}/history/run?start_season&end_season`.
+- Team `crest_url` column added to model. SQL migration: `backend/sql/005_add_team_crest.sql` (must be run on Supabase).
+- Frontend fully redesigned: dark sidebar, competition color badges, team crests in match table, multi-league ingestion UI.
+- `dev.sh` at project root starts backend + frontend together with one command.
+
 Pending:
 
+- Run `backend/sql/005_add_team_crest.sql` on Supabase to enable crest URL storage.
+- Ingest other competitions (PL, PD, BL1, SA, FL1) via Ingestion page in the UI.
 - Push local git repository to GitHub after authentication is available.
-- Run frontend `npm run build` from WSL after dependency updates if it has not been run successfully in WSL yet.
 
 ## Latest validated milestone
 
 Date: 2026-04-29
 
-The application is running end-to-end locally:
-
-1. Supabase PostgreSQL schema exists.
-2. FastAPI connects to Supabase.
-3. Champions League snapshot ingestion inserts/updates normalized semi-final data.
-4. Next.js dashboard reads backend data and renders it in the browser.
-
-## Important correction
-
-The first pilot used fake mock fixtures to validate the pipeline. Those records included incorrect quarter-final fixtures. The ingestion adapter has been corrected to use a verified UEFA official semi-final snapshot, and the ingestion service removes stale records from the original `mock_champions_league_source` when the pilot ingestion is rerun.
-
-If stale records remain in Supabase, use:
-
-```bash
-curl -X POST http://127.0.0.1:8000/ingestion/champions-league/reset-and-run
-```
+- Real football-data.org API ingestion confirmed working (Champions League history).
+- Frontend redesigned and running on `http://localhost:3000`.
+- Multi-league backend complete; UI ingestion page supports 7 competitions.
 
 ## Next immediate step
 
-Configure `backend/.env` with the real Supabase PostgreSQL `DATABASE_URL`, then start FastAPI and test `GET /health`.
+Run `backend/sql/005_add_team_crest.sql` on Supabase SQL Editor, then ingest other competitions from the Ingestion page (`http://localhost:3000/ingestion`).
 
 Preferred WSL path:
 

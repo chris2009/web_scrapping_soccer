@@ -14,6 +14,7 @@ class Team(Base):
     name: Mapped[str] = mapped_column(String(160), nullable=False)
     slug: Mapped[str] = mapped_column(String(180), unique=True, nullable=False)
     country_id: Mapped[int | None] = mapped_column(ForeignKey("countries.id"))
+    crest_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     country = relationship("Country", back_populates="teams")
     home_matches = relationship("Match", foreign_keys="Match.home_team_id", back_populates="home_team")

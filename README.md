@@ -7,7 +7,7 @@ The first phase implements a Champions League pilot with:
 - FastAPI backend in Python.
 - SQLAlchemy connection to Supabase/PostgreSQL.
 - SQL scripts for normalized tables, indexes and seed data.
-- Simulated Champions League ingestion flow.
+- Champions League ingestion flow based on a verified UEFA official snapshot.
 - Next.js frontend with TypeScript, App Router and Tailwind CSS.
 
 ## Project structure
@@ -135,7 +135,7 @@ http://localhost:3000
 4. Start Next.js on `http://localhost:3000`.
 5. Test `GET http://localhost:8000/health`.
 6. Open the frontend ingestion page.
-7. Run the simulated Champions League ingestion.
+7. Run the Champions League pilot ingestion.
 8. View matches in the dashboard and matches explorer.
 
 ## Next steps after creating Supabase tables
@@ -278,10 +278,17 @@ Validated locally in WSL:
 - Supabase tables were created with the SQL scripts in `backend/sql`.
 - FastAPI is running on `http://127.0.0.1:8000`.
 - `GET /health` returns `database.connected=true`.
-- Champions League mock ingestion was executed successfully.
+- Champions League ingestion uses a UEFA official snapshot for the current 2025/2026 semi-final phase.
 - Next.js frontend is running on `http://localhost:3000`.
-- Dashboard shows the pilot data: 1 competition, 8 teams, 4 matches and 2 upcoming matches.
 - Frontend dependency audit was fixed before build: `npm audit` reports `found 0 vulnerabilities`.
+
+To refresh the pilot data after backend changes:
+
+```bash
+curl -X POST http://127.0.0.1:8000/ingestion/champions-league/run
+```
+
+Then refresh `http://localhost:3000`.
 
 ## Collaboration rules
 

@@ -16,7 +16,7 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 - Database: Supabase/PostgreSQL.
 - ORM: SQLAlchemy.
 - First pilot competition: Champions League.
-- Current ingestion mode: simulated Champions League source with normalized example data.
+- Current ingestion mode: Champions League UEFA official snapshot with normalized semi-final data.
 - Supabase direct PostgreSQL connection string belongs in `DATABASE_URL`.
 - `SUPABASE_URL` is the Supabase API URL, not the PostgreSQL connection string.
 - No local PostgreSQL database is required while using Supabase.
@@ -73,16 +73,16 @@ Completed:
 - Supabase SQL scripts.
 - REST endpoints for health, competitions, teams, matches and ingestion.
 - Root API endpoint `GET /` returns a small service/status payload with links to `/health` and `/docs`.
-- Champions League simulated ingestion.
+- Champions League UEFA official snapshot ingestion.
 - Frontend dashboard, catalog pages, match explorer and ingestion panel.
 - Project documentation.
 - Supabase SQL scripts were executed by the user and the database tables were created.
 - Backend was started successfully from WSL.
 - Backend `/health` confirmed `database.configured=true` and `database.connected=true`.
 - Supabase connection from WSL works through Session Pooler in `DATABASE_URL`.
-- Champions League mock ingestion was executed and dashboard data is visible.
+- Champions League snapshot ingestion was executed and dashboard data is visible.
 - Frontend was started successfully on `http://localhost:3000`.
-- Dashboard currently shows 1 competition, 8 teams, 4 matches and 2 upcoming matches.
+- Dashboard should show the current Champions League semi-final snapshot after rerunning the ingestion endpoint.
 - Frontend dependencies were patched and `npm audit` reports `found 0 vulnerabilities`.
 
 Pending:
@@ -98,8 +98,12 @@ The application is running end-to-end locally:
 
 1. Supabase PostgreSQL schema exists.
 2. FastAPI connects to Supabase.
-3. Mock Champions League ingestion inserts/updates normalized data.
+3. Champions League snapshot ingestion inserts/updates normalized semi-final data.
 4. Next.js dashboard reads backend data and renders it in the browser.
+
+## Important correction
+
+The first pilot used fake mock fixtures to validate the pipeline. Those records included incorrect quarter-final fixtures. The ingestion adapter has been corrected to use a verified UEFA official semi-final snapshot, and the ingestion service removes stale records from the original `mock_champions_league_source` when the pilot ingestion is rerun.
 
 ## Next immediate step
 

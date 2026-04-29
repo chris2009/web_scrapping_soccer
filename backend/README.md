@@ -123,7 +123,7 @@ The backend has been validated from WSL with Supabase:
 - `GET /health` returns `database.configured=true`.
 - `GET /health` returns `database.connected=true`.
 - The direct Supabase IPv6 connection failed from WSL, so the working setup uses Supabase Session Pooler in `DATABASE_URL`.
-- The Champions League mock ingestion has inserted pilot data into Supabase.
+- The Champions League ingestion has inserted pilot data into Supabase.
 
 ## Run ingestion from terminal
 
@@ -135,10 +135,12 @@ python scripts/run_champions_league_ingestion.py
 
 ## Ingestion rules
 
-The pilot uses a simulated scraper. Real sources should be added as new adapters under `app/scrapers/` and must:
+The pilot currently uses a conservative UEFA official snapshot adapter instead of aggressive HTML scraping. Real live sources should be added as new adapters under `app/scrapers/` and must:
 
 - Prefer official APIs or allowed public sources.
 - Respect robots.txt and terms of use.
 - Use delays and conservative request patterns.
 - Emit normalized match dictionaries.
 - Avoid duplicates through source IDs and match natural keys.
+
+The ingestion endpoint also removes stale records created by the original `mock_champions_league_source` so old test fixtures do not remain mixed with the current Champions League semi-final snapshot.

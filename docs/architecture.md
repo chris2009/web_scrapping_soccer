@@ -5,7 +5,7 @@
 The application is a monorepo with a Python API backend and a Next.js frontend.
 
 ```text
-Source/API/Scraper
+Source/API/Snapshot/Scraper
       ↓
 Python ingestion adapter
       ↓
@@ -90,3 +90,4 @@ To add a new competition:
 
 Production scrapers should prefer official APIs or allowed public sources before HTML scraping. Any scraper must respect robots.txt, terms of use, rate limits and conservative delays.
 
+The current Champions League pilot uses a UEFA official snapshot adapter. It is intentionally conservative: it does not crawl pages aggressively and it can be replaced later by an official API or a fully compliant source adapter.

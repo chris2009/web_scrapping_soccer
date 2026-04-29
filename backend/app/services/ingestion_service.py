@@ -4,7 +4,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models import Competition, Country, DataSource, IngestionLog, Match, Season, Team, Venue
@@ -62,6 +62,13 @@ class IngestionService:
                 else:
                     updated += 1
 
+            if competition and season:
+                self._remove_stale_champions_league_mock_matches(
+                    competition=competition,
+                    season=season,
+                    current_external_ids={record["external_match_id"] for record in records},
+                )
+
             self._write_ingestion_log(
                 competition=competition,
                 data_source=data_source,
@@ -78,7 +85,7 @@ class IngestionService:
                 "records_inserted": inserted,
                 "records_updated": updated,
                 "status": "success",
-                "message": "Champions League mock ingestion completed",
+                "message": "Champions League official snapshot ingestion completed",
             }
         except Exception as exc:
             logger.exception("Champions League ingestion failed")
@@ -248,6 +255,33 @@ class IngestionService:
         )
         self.db.add(log)
         self.db.flush()
+
+    def _remove_stale_champions_league_mock_matches(
+        self,
+        competition: Competition,
+        season: Season,
+        current_external_ids: set[str],
+    ) -> None:
+        stale_source_names = {
+            "mock_champions_league_source",
+            "uefa_official_champions_league_snapshot",
+        }
+        source_ids = list(
+            self.db.scalars(
+                select(DataSource.id).where(DataSource.name.in_(stale_source_names))
+            ).all()
+        )
+        if not source_ids:
+            return
+
+        self.db.execute(
+            delete(Match).where(
+                Match.competition_id == competition.id,
+                Match.season_id == season.id,
+                Match.data_source_id.in_(source_ids),
+                Match.external_match_id.not_in(current_external_ids),
+            )
+        )
 
     def _parse_season_years(self, season_name: str) -> tuple[int | None, int | None]:
         parts = season_name.split("/")

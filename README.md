@@ -120,6 +120,43 @@ http://localhost:3000
 7. Run the simulated Champions League ingestion.
 8. View matches in the dashboard and matches explorer.
 
+## Next steps after creating Supabase tables
+
+You already completed the database creation step if the SQL scripts ran successfully in Supabase.
+
+Continue with:
+
+```powershell
+cd D:\APRENDIZAJE\PROYECTOS\Scrapping_web\football-data-app\backend
+copy .env.example .env
+```
+
+Then edit `backend/.env` and replace `DATABASE_URL` with your Supabase PostgreSQL connection string.
+
+After that, install and run the backend:
+
+```powershell
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+In a second terminal, run the frontend:
+
+```powershell
+cd D:\APRENDIZAJE\PROYECTOS\Scrapping_web\football-data-app\frontend
+copy .env.example .env.local
+npm.cmd install
+npm.cmd run dev
+```
+
+Then open:
+
+- `http://localhost:8000/health`
+- `http://localhost:8000/docs`
+- `http://localhost:3000`
+
 ## Current scope
 
 Implemented only the Champions League pilot. Future competitions should be added through new scraper/source adapters that emit the same normalized match format.
@@ -130,4 +167,3 @@ Implemented only the Champions League pilot. Future competitions should be added
 - Update the memory file when decisions, setup details, implemented scope or next steps change.
 - Update the relevant README when a change affects setup, usage, architecture or workflow.
 - Commit every completed advance, change or improvement with a clear git message.
-

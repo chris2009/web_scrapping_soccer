@@ -64,12 +64,15 @@ Completed:
 - Champions League simulated ingestion.
 - Frontend dashboard, catalog pages, match explorer and ingestion panel.
 - Project documentation.
+- Supabase SQL scripts were executed by the user and the database tables were created.
 
 Pending:
 
 - Configure real `DATABASE_URL` in `backend/.env`.
-- Run SQL scripts in Supabase.
 - Install dependencies locally.
 - Start backend and frontend.
 - Push local git repository to GitHub after authentication is available.
 
+## Next immediate step
+
+Configure `backend/.env` with the real Supabase PostgreSQL `DATABASE_URL`, then start FastAPI and test `GET /health`.

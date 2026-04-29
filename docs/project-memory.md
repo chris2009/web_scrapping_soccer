@@ -77,14 +77,29 @@ Completed:
 - Frontend dashboard, catalog pages, match explorer and ingestion panel.
 - Project documentation.
 - Supabase SQL scripts were executed by the user and the database tables were created.
+- Backend was started successfully from WSL.
+- Backend `/health` confirmed `database.configured=true` and `database.connected=true`.
+- Supabase connection from WSL works through Session Pooler in `DATABASE_URL`.
+- Champions League mock ingestion was executed and dashboard data is visible.
+- Frontend was started successfully on `http://localhost:3000`.
+- Dashboard currently shows 1 competition, 8 teams, 4 matches and 2 upcoming matches.
+- Frontend dependencies were patched and `npm audit` reports `found 0 vulnerabilities`.
 
 Pending:
 
-- Configure real `DATABASE_URL` in `backend/.env`.
-- Install dependencies locally.
-- Start backend and frontend.
 - Push local git repository to GitHub after authentication is available.
-- Run frontend `npm install`, `npm audit`, and `npm run build` from WSL after dependency updates.
+- Run frontend `npm run build` from WSL after dependency updates if it has not been run successfully in WSL yet.
+
+## Latest validated milestone
+
+Date: 2026-04-29
+
+The application is running end-to-end locally:
+
+1. Supabase PostgreSQL schema exists.
+2. FastAPI connects to Supabase.
+3. Mock Champions League ingestion inserts/updates normalized data.
+4. Next.js dashboard reads backend data and renders it in the browser.
 
 ## Next immediate step
 

@@ -271,6 +271,18 @@ SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
 
 Implemented only the Champions League pilot. Future competitions should be added through new scraper/source adapters that emit the same normalized match format.
 
+## Current local status
+
+Validated locally in WSL:
+
+- Supabase tables were created with the SQL scripts in `backend/sql`.
+- FastAPI is running on `http://127.0.0.1:8000`.
+- `GET /health` returns `database.connected=true`.
+- Champions League mock ingestion was executed successfully.
+- Next.js frontend is running on `http://localhost:3000`.
+- Dashboard shows the pilot data: 1 competition, 8 teams, 4 matches and 2 upcoming matches.
+- Frontend dependency audit was fixed before build: `npm audit` reports `found 0 vulnerabilities`.
+
 ## Collaboration rules
 
 - Keep project context in `docs/project-memory.md`.

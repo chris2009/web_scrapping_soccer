@@ -52,6 +52,16 @@ http://localhost:3000
 
 The backend must be running on `http://localhost:8000` for live data.
 
+## Current local validation
+
+The frontend has been validated from WSL:
+
+- Runs on `http://localhost:3000`.
+- Connects to the FastAPI backend through `NEXT_PUBLIC_API_URL`.
+- Dashboard renders Supabase-backed pilot data.
+- Current dashboard counts after pilot ingestion: 1 competition, 8 teams, 4 matches and 2 upcoming matches.
+- Dependency audit result: `found 0 vulnerabilities`.
+
 ## Security updates
 
 The project pins patched frontend dependencies and uses an npm `overrides` rule for `postcss`.

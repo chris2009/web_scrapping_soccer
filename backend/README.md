@@ -116,6 +116,15 @@ Do not run plain `pip install -r requirements.txt` before activating the virtual
 - `GET /matches/by-team/{team_id}`
 - `POST /ingestion/champions-league/run`
 
+## Current local validation
+
+The backend has been validated from WSL with Supabase:
+
+- `GET /health` returns `database.configured=true`.
+- `GET /health` returns `database.connected=true`.
+- The direct Supabase IPv6 connection failed from WSL, so the working setup uses Supabase Session Pooler in `DATABASE_URL`.
+- The Champions League mock ingestion has inserted pilot data into Supabase.
+
 ## Run ingestion from terminal
 
 ```bash

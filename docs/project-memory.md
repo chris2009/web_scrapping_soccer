@@ -85,6 +85,7 @@ Completed:
 - Champions League snapshot ingestion was executed and dashboard data is visible.
 - Frontend was started successfully on `http://localhost:3000`.
 - Dashboard should show the current Champions League semi-final snapshot after rerunning the ingestion endpoint.
+- Dashboard main table now shows all current pilot matches instead of only recent completed results.
 - Frontend dependencies were patched and `npm audit` reports `found 0 vulnerabilities`.
 
 Pending:

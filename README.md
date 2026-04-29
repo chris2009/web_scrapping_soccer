@@ -290,6 +290,13 @@ curl -X POST http://127.0.0.1:8000/ingestion/champions-league/run
 
 Then refresh `http://localhost:3000`.
 
+Expected result after rerunning ingestion:
+
+- Dashboard table title: `Current pilot matches`.
+- The old fake fixtures `Arsenal vs Borussia Dortmund` and `Barcelona vs Inter Milan` should disappear.
+- Current pilot matches should include Paris vs Bayern, Atletico de Madrid vs Arsenal, Arsenal vs Atletico de Madrid, and Bayern Munchen vs Paris.
+- The dashboard table now shows all current pilot matches, not only completed recent results.
+
 ## Collaboration rules
 
 - Keep project context in `docs/project-memory.md`.

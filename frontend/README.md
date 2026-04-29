@@ -72,7 +72,7 @@ The frontend has been validated from WSL:
 - Runs on `http://localhost:3000`.
 - Connects to the FastAPI backend through `NEXT_PUBLIC_API_URL`.
 - Dashboard renders Supabase-backed pilot data.
-- Current dashboard counts after pilot ingestion: 1 competition, 8 teams, 4 matches and 2 upcoming matches.
+- Dashboard shows the current pilot matches table, including scheduled and completed Champions League semi-final fixtures.
 - Dependency audit result: `found 0 vulnerabilities`.
 
 ## Security updates

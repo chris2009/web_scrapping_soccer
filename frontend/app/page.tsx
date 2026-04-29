@@ -5,12 +5,11 @@ import { api } from "@/lib/api";
 
 export default async function DashboardPage() {
   try {
-    const [competitions, teams, matches, upcoming, recent] = await Promise.all([
+    const [competitions, teams, matches, upcoming] = await Promise.all([
       api.competitions(),
       api.teams(),
       api.matches(),
       api.upcomingMatches(),
-      api.recentResults(),
     ]);
 
     return (
@@ -32,9 +31,9 @@ export default async function DashboardPage() {
 
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-ink">Recent results</h2>
+            <h2 className="text-lg font-semibold text-ink">Current pilot matches</h2>
           </div>
-          <MatchesTable matches={recent.slice(0, 6)} />
+          <MatchesTable matches={matches.slice(0, 8)} />
         </section>
       </div>
     );
@@ -47,4 +46,3 @@ export default async function DashboardPage() {
     );
   }
 }
-

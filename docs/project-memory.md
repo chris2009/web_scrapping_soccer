@@ -68,6 +68,7 @@ Completed:
 - SQLAlchemy models.
 - Supabase SQL scripts.
 - REST endpoints for health, competitions, teams, matches and ingestion.
+- Root API endpoint `GET /` returns a small service/status payload with links to `/health` and `/docs`.
 - Champions League simulated ingestion.
 - Frontend dashboard, catalog pages, match explorer and ingestion panel.
 - Project documentation.

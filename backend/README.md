@@ -102,6 +102,7 @@ Do not run plain `pip install -r requirements.txt` before activating the virtual
 
 ## Endpoints
 
+- `GET /`
 - `GET /health`
 - `GET /competitions`
 - `GET /teams`

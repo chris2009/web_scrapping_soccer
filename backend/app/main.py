@@ -30,6 +30,17 @@ app.add_middleware(
 )
 
 
+@app.get("/", tags=["root"])
+def root() -> dict:
+    return {
+        "service": "football-data-api",
+        "status": "running",
+        "health": "/health",
+        "docs": "/docs",
+        "openapi": "/openapi.json",
+    }
+
+
 @app.exception_handler(RuntimeError)
 async def runtime_error_handler(_: Request, exc: RuntimeError):
     logger.error("Runtime error: %s", exc)
@@ -41,4 +52,3 @@ app.include_router(competitions_router)
 app.include_router(teams_router)
 app.include_router(matches_router)
 app.include_router(ingestion_router)
-

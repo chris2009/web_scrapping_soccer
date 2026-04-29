@@ -92,6 +92,7 @@ python -m uvicorn app.main:app --reload --port 8000
 Backend URLs:
 
 - API: `http://localhost:8000`
+- Root: `http://localhost:8000/`
 - Health: `http://localhost:8000/health`
 - Docs: `http://localhost:8000/docs`
 
@@ -180,6 +181,8 @@ Then open:
 - `http://localhost:8000/health`
 - `http://localhost:8000/docs`
 - `http://localhost:3000`
+
+If `http://localhost:8000/` returns a JSON object with `service`, `status`, `health` and `docs`, the FastAPI server is running.
 
 ## WSL Python troubleshooting
 

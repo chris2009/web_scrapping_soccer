@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import {
   CalendarDays,
   DatabaseZap,
   Home,
+  LogOut,
   Shield,
   TrendingUp,
   Users,
@@ -31,6 +33,13 @@ const leagues = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-64 bg-sidebar flex flex-col z-20 overflow-y-auto">
@@ -89,11 +98,16 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-5 py-4 border-t border-slate-700/60">
-        <p className="text-[10px] text-slate-600 leading-relaxed">
-          Data via football-data.org
-        </p>
-        <p className="text-[10px] text-slate-600">
+      <div className="px-3 py-4 border-t border-slate-700/60 space-y-1">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+        >
+          <LogOut size={17} aria-hidden="true" />
+          Sign out
+        </button>
+        <p className="px-3 text-[10px] text-slate-700 leading-relaxed">
           FastAPI · Supabase · Next.js
         </p>
       </div>

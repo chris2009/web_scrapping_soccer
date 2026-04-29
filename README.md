@@ -80,6 +80,12 @@ SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
 
 You do not need a local PostgreSQL database for this project if you are using Supabase.
 
+To ingest historical Champions League matches from 2020 onward, configure a football-data.org API token:
+
+```text
+FOOTBALL_DATA_API_TOKEN=YOUR_FOOTBALL_DATA_ORG_TOKEN
+```
+
 ## 3. Run backend
 
 ```bash
@@ -159,6 +165,12 @@ DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0
 
 Replace `YOUR_REAL_PASSWORD` with the database password configured in Supabase.
 Replace `YOUR_REGION` with the region shown by Supabase in the pooler connection string.
+
+If you want historical Champions League data since 2020, also set:
+
+```text
+FOOTBALL_DATA_API_TOKEN=YOUR_FOOTBALL_DATA_ORG_TOKEN
+```
 
 After that, install and run the backend:
 
@@ -295,6 +307,14 @@ curl -X POST http://127.0.0.1:8000/ingestion/champions-league/reset-and-run
 ```
 
 Then refresh `http://localhost:3000`.
+
+To ingest Champions League seasons from 2020 onward using football-data.org:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/ingestion/champions-league/history/run?start_season=2020&end_season=2025"
+```
+
+This requires `FOOTBALL_DATA_API_TOKEN` in `backend/.env`.
 
 Expected result after rerunning ingestion:
 

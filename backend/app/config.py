@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     database_url: str = Field(default="", alias="DATABASE_URL")
     supabase_url: str = Field(default="", alias="SUPABASE_URL")
     supabase_key: str = Field(default="", alias="SUPABASE_KEY")
+    football_data_api_token: str = Field(default="", alias="FOOTBALL_DATA_API_TOKEN")
     allowed_origins: str = Field(
         default="http://localhost:3000",
         alias="ALLOWED_ORIGINS",
@@ -30,4 +31,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

@@ -65,6 +65,8 @@ Restart the frontend dev server only when:
 
 Match dates are formatted with an explicit `America/Lima` timezone to avoid server/client hydration mismatches.
 
+The root `<html>` element uses `suppressHydrationWarning` because some browser extensions add attributes such as `class="hydrated"` before React loads.
+
 ## Current local validation
 
 The frontend has been validated from WSL:

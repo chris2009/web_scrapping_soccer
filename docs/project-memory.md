@@ -22,6 +22,7 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 - `SUPABASE_URL` is the Supabase API URL, not the PostgreSQL connection string.
 - No local PostgreSQL database is required while using Supabase.
 - WSL may not reach Supabase direct connections because those resolve to IPv6. Prefer Supabase Session Pooler in `DATABASE_URL` for local WSL.
+- Historical Champions League ingestion from 2020 onward uses football-data.org and requires `FOOTBALL_DATA_API_TOKEN`.
 
 ## Supabase SQL scripts
 
@@ -87,6 +88,8 @@ Completed:
 - Dashboard should show the current Champions League semi-final snapshot after rerunning the ingestion endpoint.
 - Dashboard main table now shows all current pilot matches instead of only recent completed results.
 - Backend includes `POST /ingestion/champions-league/reset-and-run` to delete stale Champions League 2025/2026 pilot matches and ingest the current official snapshot.
+- Backend includes `POST /ingestion/champions-league/history/run?start_season=2020&end_season=2025` to ingest Champions League history through football-data.org.
+- Frontend root layout uses `suppressHydrationWarning` because browser extensions can add `class="hydrated"` to `<html>` before React hydration.
 - Frontend dependencies were patched and `npm audit` reports `found 0 vulnerabilities`.
 
 Pending:

@@ -38,6 +38,7 @@ Required:
 DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
 SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 SUPABASE_KEY=YOUR_SUPABASE_ANON_OR_SERVICE_ROLE_KEY
+FOOTBALL_DATA_API_TOKEN=
 APP_ENV=development
 LOG_LEVEL=INFO
 ALLOWED_ORIGINS=http://localhost:3000
@@ -60,6 +61,8 @@ No local PostgreSQL database is required when using Supabase.
 If `/health` shows `Network is unreachable` with an IPv6 address, the direct connection is not reachable from WSL. Replace `DATABASE_URL` with the Session Pooler connection string from Supabase Dashboard > Connect > Connection pooling.
 
 `SUPABASE_URL` and `SUPABASE_KEY` are placeholders for future use with the official Supabase client. The current persistence layer uses SQLAlchemy and `DATABASE_URL`.
+
+`FOOTBALL_DATA_API_TOKEN` is required only for historical Champions League ingestion through football-data.org.
 
 ## Install and run
 
@@ -116,6 +119,7 @@ Do not run plain `pip install -r requirements.txt` before activating the virtual
 - `GET /matches/by-team/{team_id}`
 - `POST /ingestion/champions-league/run`
 - `POST /ingestion/champions-league/reset-and-run`
+- `POST /ingestion/champions-league/history/run?start_season=2020&end_season=2025`
 
 ## Current local validation
 
@@ -154,6 +158,22 @@ The old fake fixtures must be gone:
 - `Paris Saint-Germain vs Bayern Munich` on May 7, 2026
 - `Arsenal vs Borussia Dortmund`
 - `Barcelona vs Inter Milan`
+
+## Ingest Champions League history since 2020
+
+The historical ingestion uses football-data.org, not aggressive HTML scraping. Add your API token to `backend/.env`:
+
+```text
+FOOTBALL_DATA_API_TOKEN=YOUR_FOOTBALL_DATA_ORG_TOKEN
+```
+
+Then restart FastAPI and run:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/ingestion/champions-league/history/run?start_season=2020&end_season=2025"
+```
+
+The backend uses competition code `CL` and the `season` filter supported by football-data.org.
 
 ## Ingestion rules
 

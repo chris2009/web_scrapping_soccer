@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Competition, Country, DataSource, IngestionLog, Match, Season, Team, Venue
 from app.scrapers.champions_league_scraper import ChampionsLeagueMockScraper
+from app.scrapers.football_data_org_scraper import FootballDataOrgChampionsLeagueScraper
 from app.utils.logger import get_logger
 
 
@@ -52,6 +53,21 @@ class IngestionService:
     def run_champions_league_ingestion(self) -> dict[str, Any]:
         scraper = ChampionsLeagueMockScraper()
         records = scraper.fetch_matches()
+        return self._ingest_normalized_matches(records=records, source_name=scraper.source_name)
+
+    def run_champions_league_history_ingestion(self, start_season: int = 2020, end_season: int = 2025) -> dict[str, Any]:
+        if start_season < 2020:
+            raise RuntimeError("start_season must be 2020 or later")
+        if end_season < start_season:
+            raise RuntimeError("end_season must be greater than or equal to start_season")
+        if end_season > 2026:
+            raise RuntimeError("end_season cannot be greater than 2026")
+
+        scraper = FootballDataOrgChampionsLeagueScraper()
+        records = scraper.fetch_matches_for_seasons(start_season=start_season, end_season=end_season)
+        return self._ingest_normalized_matches(records=records, source_name=scraper.source_name)
+
+    def _ingest_normalized_matches(self, records: list[dict[str, Any]], source_name: str) -> dict[str, Any]:
         inserted = 0
         updated = 0
         competition: Competition | None = None
@@ -104,12 +120,12 @@ class IngestionService:
             self.db.commit()
             return {
                 "competition": "Champions League",
-                "source_name": scraper.source_name,
+                "source_name": source_name,
                 "records_found": len(records),
                 "records_inserted": inserted,
                 "records_updated": updated,
                 "status": "success",
-                "message": "Champions League official snapshot ingestion completed",
+                "message": "Champions League ingestion completed",
             }
         except Exception as exc:
             logger.exception("Champions League ingestion failed")

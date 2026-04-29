@@ -52,6 +52,19 @@ http://localhost:3000
 
 The backend must be running on `http://localhost:8000` for live data.
 
+## Development refresh
+
+If `npm run dev` is already running, pressing F5 in the browser is enough to refresh the UI.
+
+Restart the frontend dev server only when:
+
+- The terminal running `npm run dev` was closed.
+- Dependencies changed after `npm install`.
+- Environment variables changed in `.env.local`.
+- Next.js asks for a restart.
+
+Match dates are formatted with an explicit `America/Lima` timezone to avoid server/client hydration mismatches.
+
 ## Current local validation
 
 The frontend has been validated from WSL:

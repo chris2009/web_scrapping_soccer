@@ -12,6 +12,7 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 - Frontend: Next.js with TypeScript, App Router and Tailwind CSS.
 - Frontend dependencies were upgraded to patched versions. Current target is Next.js `16.2.4`, React `19.2.5`, React DOM `19.2.5`, ESLint `9.39.4`, `eslint-config-next` `16.2.4`, and PostCSS `8.5.12`.
 - Frontend `package.json` uses npm `overrides.postcss=8.5.12` so transitive dependencies do not pull a vulnerable PostCSS version.
+- Frontend match dates are formatted with explicit `America/Lima` timezone to avoid server/client hydration mismatches.
 - Backend: Python with FastAPI.
 - Database: Supabase/PostgreSQL.
 - ORM: SQLAlchemy.
@@ -55,6 +56,7 @@ Matches are deduplicated by:
 - Use WSL/Linux shell commands in user-facing instructions.
 - For backend Python installs, always use a virtual environment and `python -m pip`, not system `pip`.
 - For frontend installs, use WSL npm only. If Windows npm and WSL npm are mixed, clean `node_modules` and `.next` from WSL and reinstall.
+- If `npm run dev` is already running, browser F5 is enough. Restart Next.js only after dependency/env changes or if the dev server stopped.
 - Do not store real credentials, private keys or secrets in the repository.
 - Keep implementation focused on the current phase unless a new phase is explicitly requested.
 

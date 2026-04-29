@@ -2,9 +2,10 @@ import type { Match } from "@/types/match";
 import StatusBadge from "@/components/StatusBadge";
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "America/Lima",
   }).format(new Date(value));
 }
 
@@ -58,4 +59,3 @@ export default function MatchesTable({ matches }: { matches: Match[] }) {
     </div>
   );
 }
-

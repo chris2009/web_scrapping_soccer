@@ -7,6 +7,7 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 ## Current project
 
 - Repository folder: `football-data-app`.
+- User works in WSL/Linux shell. Provide bash commands, not PowerShell commands.
 - Frontend: Next.js with TypeScript, App Router and Tailwind CSS.
 - Backend: Python with FastAPI.
 - Database: Supabase/PostgreSQL.
@@ -44,6 +45,7 @@ Matches are deduplicated by:
 - Every meaningful advance, change or improvement must end with a git commit.
 - Update this memory file whenever project context, decisions, setup, architecture or next steps change.
 - Update the relevant README whenever commands, setup, usage or structure change.
+- Use WSL/Linux shell commands in user-facing instructions.
 - Do not store real credentials, private keys or secrets in the repository.
 - Keep implementation focused on the current phase unless a new phase is explicitly requested.
 
@@ -76,3 +78,9 @@ Pending:
 ## Next immediate step
 
 Configure `backend/.env` with the real Supabase PostgreSQL `DATABASE_URL`, then start FastAPI and test `GET /health`.
+
+Preferred WSL path:
+
+```bash
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app
+```

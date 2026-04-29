@@ -36,12 +36,12 @@ football-data-app/
 `-- README.md
 ```
 
-## Local setup on Windows 11
+## Local setup with WSL
 
 Open the repository folder in VS Code:
 
-```powershell
-cd D:\APRENDIZAJE\PROYECTOS\Scrapping_web\football-data-app
+```bash
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app
 code .
 ```
 
@@ -57,19 +57,19 @@ backend/sql/003_seed_initial_data.sql
 
 ## 2. Configure backend environment
 
-```powershell
+```bash
 cd backend
-copy .env.example .env
+cp .env.example .env
 ```
 
 Edit `backend/.env` and set `DATABASE_URL` with your Supabase PostgreSQL connection string.
 
 ## 3. Run backend
 
-```powershell
+```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
@@ -84,9 +84,9 @@ Backend URLs:
 
 Open a second VS Code terminal:
 
-```powershell
+```bash
 cd frontend
-copy .env.example .env.local
+cp .env.example .env.local
 ```
 
 Confirm this value:
@@ -97,10 +97,10 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## 5. Run frontend
 
-```powershell
+```bash
 cd frontend
-npm.cmd install
-npm.cmd run dev
+npm install
+npm run dev
 ```
 
 Frontend URL:
@@ -126,29 +126,29 @@ You already completed the database creation step if the SQL scripts ran successf
 
 Continue with:
 
-```powershell
-cd D:\APRENDIZAJE\PROYECTOS\Scrapping_web\football-data-app\backend
-copy .env.example .env
+```bash
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/backend
+cp .env.example .env
 ```
 
 Then edit `backend/.env` and replace `DATABASE_URL` with your Supabase PostgreSQL connection string.
 
 After that, install and run the backend:
 
-```powershell
+```bash
 python -m venv venv
-venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
 In a second terminal, run the frontend:
 
-```powershell
-cd D:\APRENDIZAJE\PROYECTOS\Scrapping_web\football-data-app\frontend
-copy .env.example .env.local
-npm.cmd install
-npm.cmd run dev
+```bash
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/frontend
+cp .env.example .env.local
+npm install
+npm run dev
 ```
 
 Then open:
@@ -167,3 +167,4 @@ Implemented only the Champions League pilot. Future competitions should be added
 - Update the memory file when decisions, setup details, implemented scope or next steps change.
 - Update the relevant README when a change affects setup, usage, architecture or workflow.
 - Commit every completed advance, change or improvement with a clear git message.
+- Use WSL/Linux shell commands in instructions, not PowerShell commands.

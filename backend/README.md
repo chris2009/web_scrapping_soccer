@@ -28,8 +28,8 @@ FastAPI backend for the football data application.
 
 Copy `.env.example` to `.env`:
 
-```powershell
-copy .env.example .env
+```bash
+cp .env.example .env
 ```
 
 Required:
@@ -47,10 +47,10 @@ ALLOWED_ORIGINS=http://localhost:3000
 
 ## Install and run
 
-```powershell
+```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
@@ -70,10 +70,10 @@ uvicorn app.main:app --reload --port 8000
 
 ## Run ingestion from terminal
 
-```powershell
+```bash
 cd backend
-venv\Scripts\activate
-python scripts\run_champions_league_ingestion.py
+source venv/bin/activate
+python scripts/run_champions_league_ingestion.py
 ```
 
 ## Ingestion rules
@@ -85,4 +85,3 @@ The pilot uses a simulated scraper. Real sources should be added as new adapters
 - Use delays and conservative request patterns.
 - Emit normalized match dictionaries.
 - Avoid duplicates through source IDs and match natural keys.
-

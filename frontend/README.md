@@ -26,8 +26,8 @@ Next.js frontend for the football data dashboard.
 
 Copy `.env.example` to `.env.local`:
 
-```powershell
-copy .env.example .env.local
+```bash
+cp .env.example .env.local
 ```
 
 Expected value:
@@ -38,7 +38,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## Install and run
 
-```powershell
+```bash
 cd frontend
 npm install
 npm run dev
@@ -51,4 +51,3 @@ http://localhost:3000
 ```
 
 The backend must be running on `http://localhost:8000` for live data.
-

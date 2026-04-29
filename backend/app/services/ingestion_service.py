@@ -25,6 +25,30 @@ class IngestionService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
+    def reset_and_run_champions_league_ingestion(self) -> dict[str, Any]:
+        competition = self.db.scalar(
+            select(Competition).where(Competition.slug == "champions-league")
+        )
+        if competition:
+            season = self.db.scalar(
+                select(Season).where(
+                    Season.competition_id == competition.id,
+                    Season.name == "2025/2026",
+                )
+            )
+            if season:
+                self.db.execute(
+                    delete(Match).where(
+                        Match.competition_id == competition.id,
+                        Match.season_id == season.id,
+                    )
+                )
+                self.db.flush()
+
+        result = self.run_champions_league_ingestion()
+        result["message"] = "Champions League pilot data reset and official snapshot ingestion completed"
+        return result
+
     def run_champions_league_ingestion(self) -> dict[str, Any]:
         scraper = ChampionsLeagueMockScraper()
         records = scraper.fetch_matches()

@@ -115,6 +115,7 @@ Do not run plain `pip install -r requirements.txt` before activating the virtual
 - `GET /matches/by-competition/{competition_id}`
 - `GET /matches/by-team/{team_id}`
 - `POST /ingestion/champions-league/run`
+- `POST /ingestion/champions-league/reset-and-run`
 
 ## Current local validation
 
@@ -132,6 +133,27 @@ cd backend
 source venv/bin/activate
 python scripts/run_champions_league_ingestion.py
 ```
+
+## Reset pilot data and run ingestion
+
+If old pilot records are still visible, reset the Champions League 2025/2026 pilot data and ingest the current snapshot:
+
+```bash
+curl -X POST http://127.0.0.1:8000/ingestion/champions-league/reset-and-run
+```
+
+Then verify:
+
+```bash
+curl http://127.0.0.1:8000/matches
+```
+
+The old fake fixtures must be gone:
+
+- `Real Madrid vs Manchester City`
+- `Paris Saint-Germain vs Bayern Munich` on May 7, 2026
+- `Arsenal vs Borussia Dortmund`
+- `Barcelona vs Inter Milan`
 
 ## Ingestion rules
 

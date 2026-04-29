@@ -16,3 +16,10 @@ def run_champions_league_ingestion(db: Session = Depends(get_db)):
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
+
+@router.post("/champions-league/reset-and-run", response_model=IngestionResult)
+def reset_and_run_champions_league_ingestion(db: Session = Depends(get_db)):
+    try:
+        return IngestionService(db).reset_and_run_champions_league_ingestion()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc

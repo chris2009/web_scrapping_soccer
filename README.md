@@ -288,6 +288,12 @@ To refresh the pilot data after backend changes:
 curl -X POST http://127.0.0.1:8000/ingestion/champions-league/run
 ```
 
+If old pilot mock matches are still visible, use the reset endpoint:
+
+```bash
+curl -X POST http://127.0.0.1:8000/ingestion/champions-league/reset-and-run
+```
+
 Then refresh `http://localhost:3000`.
 
 Expected result after rerunning ingestion:

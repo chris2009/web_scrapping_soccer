@@ -86,6 +86,7 @@ Completed:
 - Frontend was started successfully on `http://localhost:3000`.
 - Dashboard should show the current Champions League semi-final snapshot after rerunning the ingestion endpoint.
 - Dashboard main table now shows all current pilot matches instead of only recent completed results.
+- Backend includes `POST /ingestion/champions-league/reset-and-run` to delete stale Champions League 2025/2026 pilot matches and ingest the current official snapshot.
 - Frontend dependencies were patched and `npm audit` reports `found 0 vulnerabilities`.
 
 Pending:
@@ -107,6 +108,12 @@ The application is running end-to-end locally:
 ## Important correction
 
 The first pilot used fake mock fixtures to validate the pipeline. Those records included incorrect quarter-final fixtures. The ingestion adapter has been corrected to use a verified UEFA official semi-final snapshot, and the ingestion service removes stale records from the original `mock_champions_league_source` when the pilot ingestion is rerun.
+
+If stale records remain in Supabase, use:
+
+```bash
+curl -X POST http://127.0.0.1:8000/ingestion/champions-league/reset-and-run
+```
 
 ## Next immediate step
 

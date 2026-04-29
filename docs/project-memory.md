@@ -14,6 +14,9 @@ Build a fullstack web application to collect, normalize, store and visualize foo
 - ORM: SQLAlchemy.
 - First pilot competition: Champions League.
 - Current ingestion mode: simulated Champions League source with normalized example data.
+- Supabase direct PostgreSQL connection string belongs in `DATABASE_URL`.
+- `SUPABASE_URL` is the Supabase API URL, not the PostgreSQL connection string.
+- No local PostgreSQL database is required while using Supabase.
 
 ## Supabase SQL scripts
 
@@ -83,4 +86,11 @@ Preferred WSL path:
 
 ```bash
 cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app
+```
+
+Expected backend database configuration:
+
+```text
+DATABASE_URL=postgresql://postgres:YOUR_REAL_PASSWORD@db.fdnyhwywhrpuhfwfhalj.supabase.co:5432/postgres
+SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
 ```

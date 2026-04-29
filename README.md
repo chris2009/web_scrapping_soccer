@@ -64,6 +64,20 @@ cp .env.example .env
 
 Edit `backend/.env` and set `DATABASE_URL` with your Supabase PostgreSQL connection string.
 
+Use the direct PostgreSQL connection string from Supabase in `DATABASE_URL`:
+
+```text
+DATABASE_URL=postgresql://postgres:YOUR_REAL_PASSWORD@db.fdnyhwywhrpuhfwfhalj.supabase.co:5432/postgres
+```
+
+Do not put this value in `SUPABASE_URL`. `SUPABASE_URL` is the project API URL, usually like:
+
+```text
+SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
+```
+
+You do not need a local PostgreSQL database for this project if you are using Supabase.
+
 ## 3. Run backend
 
 ```bash
@@ -132,6 +146,14 @@ cp .env.example .env
 ```
 
 Then edit `backend/.env` and replace `DATABASE_URL` with your Supabase PostgreSQL connection string.
+
+For your Supabase project, the value should look like this:
+
+```text
+DATABASE_URL=postgresql://postgres:YOUR_REAL_PASSWORD@db.fdnyhwywhrpuhfwfhalj.supabase.co:5432/postgres
+```
+
+Replace `YOUR_REAL_PASSWORD` with the database password configured in Supabase.
 
 After that, install and run the backend:
 

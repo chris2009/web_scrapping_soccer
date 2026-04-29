@@ -43,6 +43,20 @@ LOG_LEVEL=INFO
 ALLOWED_ORIGINS=http://localhost:3000
 ```
 
+For the current Supabase project, use the direct connection string in `DATABASE_URL`:
+
+```text
+DATABASE_URL=postgresql://postgres:YOUR_REAL_PASSWORD@db.fdnyhwywhrpuhfwfhalj.supabase.co:5432/postgres
+```
+
+`SUPABASE_URL` is not the database connection string. It is the Supabase API URL:
+
+```text
+SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
+```
+
+No local PostgreSQL database is required when using Supabase.
+
 `SUPABASE_URL` and `SUPABASE_KEY` are placeholders for future use with the official Supabase client. The current persistence layer uses SQLAlchemy and `DATABASE_URL`.
 
 ## Install and run

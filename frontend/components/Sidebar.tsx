@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   CalendarDays,
   DatabaseZap,
@@ -10,15 +10,22 @@ import {
   LogOut,
   Shield,
   TrendingUp,
+  User,
   Users,
+  UsersRound,
 } from "lucide-react";
+import { getAuthInfo, type AuthInfo } from "@/lib/auth";
 
-const navItems = [
-  { href: "/",            label: "Dashboard",   icon: Home },
-  { href: "/competitions",label: "Competitions", icon: Shield },
-  { href: "/teams",       label: "Teams",        icon: Users },
-  { href: "/matches",     label: "Matches",      icon: CalendarDays },
-  { href: "/ingestion",   label: "Ingestion",    icon: DatabaseZap },
+const commonNav = [
+  { href: "/",             label: "Dashboard",   icon: Home },
+  { href: "/competitions", label: "Competitions", icon: Shield },
+  { href: "/teams",        label: "Teams",        icon: Users },
+  { href: "/matches",      label: "Matches",      icon: CalendarDays },
+];
+
+const adminNav = [
+  { href: "/ingestion", label: "Ingestion",      icon: DatabaseZap },
+  { href: "/users",     label: "User Management", icon: UsersRound },
 ];
 
 const leagues = [
@@ -33,7 +40,15 @@ const leagues = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const router   = useRouter();
+  const [authInfo, setAuthInfo] = useState<AuthInfo | null>(null);
+
+  useEffect(() => {
+    setAuthInfo(getAuthInfo());
+  }, []);
+
+  const isAdmin = authInfo?.role === "admin";
+  const navItems = isAdmin ? [...commonNav, ...adminNav] : commonNav;
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -60,7 +75,7 @@ export default function Sidebar() {
           Navigation
         </p>
         {navItems.map((item) => {
-          const Icon = item.icon;
+          const Icon   = item.icon;
           const active = pathname === item.href;
           return (
             <Link
@@ -78,7 +93,7 @@ export default function Sidebar() {
           );
         })}
 
-        {/* Leagues quick list */}
+        {/* Leagues */}
         <p className="px-3 mt-6 mb-2 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
           Leagues
         </p>
@@ -87,18 +102,26 @@ export default function Sidebar() {
             key={league.code}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-text hover:text-white hover:bg-sidebar-hover transition-colors mb-0.5"
           >
-            <span
-              className="h-2.5 w-2.5 rounded-full shrink-0"
-              style={{ backgroundColor: league.color }}
-            />
+            <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: league.color }} />
             <span className="truncate">{league.name}</span>
             <span className="ml-auto text-[10px] font-mono text-slate-600">{league.code}</span>
           </div>
         ))}
       </nav>
 
-      {/* Footer */}
+      {/* User info + logout */}
       <div className="px-3 py-4 border-t border-slate-700/60 space-y-1">
+        {authInfo && (
+          <div className="flex items-center gap-3 px-3 py-2 mb-1">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-700">
+              <User size={14} className="text-slate-300" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-semibold text-white">{authInfo.username}</p>
+              <p className="text-[10px] text-slate-500 capitalize">{authInfo.role}</p>
+            </div>
+          </div>
+        )}
         <button
           type="button"
           onClick={handleLogout}
@@ -107,9 +130,6 @@ export default function Sidebar() {
           <LogOut size={17} aria-hidden="true" />
           Sign out
         </button>
-        <p className="px-3 text-[10px] text-slate-700 leading-relaxed">
-          FastAPI · Supabase · Next.js
-        </p>
       </div>
     </aside>
   );

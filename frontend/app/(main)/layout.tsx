@@ -1,14 +1,14 @@
-import Footer from "@/components/Footer";
+import MainContent from "@/components/MainContent";
 import Sidebar from "@/components/Sidebar";
+import { SidebarProvider } from "@/context/SidebarContext";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
-      <div className="ml-64 flex flex-1 min-w-0 flex-col">
-        <main className="flex-1 p-8">{children}</main>
-        <Footer />
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-slate-100">
+        <Sidebar />
+        <MainContent>{children}</MainContent>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes_auth import router as auth_router
+from app.api.routes_stats import router as stats_router
 from app.api.routes_competitions import router as competitions_router
 from app.api.routes_health import router as health_router
 from app.api.routes_ingestion import router as ingestion_router
@@ -76,3 +77,4 @@ app.include_router(competitions_router)
 app.include_router(teams_router)
 app.include_router(matches_router)
 app.include_router(ingestion_router)
+app.include_router(stats_router)

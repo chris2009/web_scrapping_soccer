@@ -22,6 +22,21 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+export type TopTeam = {
+  id: number;
+  name: string;
+  crest_url: string | null;
+  total_goals: number;
+  total_wins: number;
+  total_played: number;
+};
+
+export type GoalPoint = {
+  date: string;
+  scored: number;
+  conceded: number;
+};
+
 export type IngestionResult = {
   competition: string;
   source_name: string;
@@ -57,6 +72,11 @@ export const api = {
     request<Match[]>(`/matches/by-competition/${competitionId}`),
   matchesByTeam: (teamId: number) =>
     request<Match[]>(`/matches/by-team/${teamId}`),
+
+  // Stats
+  topTeams: (limit = 10) => request<TopTeam[]>(`/stats/top-teams?limit=${limit}`),
+  goalsTimeline: (teamId: number) => request<GoalPoint[]>(`/stats/goals-timeline?team_id=${teamId}`),
+  standings: (code: string) => request<unknown>(`/competitions/${code}/standings`),
 
   // Ingestion
   runChampionsLeagueIngestion: () =>

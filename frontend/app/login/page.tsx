@@ -94,6 +94,7 @@ export default function LoginPage() {
                 disabled={loading}
                 placeholder="admin"
                 className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-emerald-500/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 transition-colors"
+                suppressHydrationWarning
               />
             </div>
 
@@ -112,6 +113,7 @@ export default function LoginPage() {
                   disabled={loading}
                   placeholder="••••••••"
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-11 text-sm text-white placeholder:text-slate-600 focus:border-emerald-500/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 transition-colors"
+                  suppressHydrationWarning
                 />
                 <button
                   type="button"

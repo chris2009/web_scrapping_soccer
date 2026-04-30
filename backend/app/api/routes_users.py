@@ -59,6 +59,8 @@ def update_user(
         user.role = body.role
     if body.is_active is not None:
         user.is_active = body.is_active
+    if body.avatar_url is not None:
+        user.avatar_url = body.avatar_url
     db.commit()
     db.refresh(user)
     return user

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
   DatabaseZap,
@@ -15,6 +15,34 @@ import {
   UsersRound,
 } from "lucide-react";
 import { getAuthInfo, type AuthInfo } from "@/lib/auth";
+
+function UserAvatar({ username }: { username: string }) {
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/users/me")
+      .then((r) => r.json())
+      .then((d) => { if (d.avatar_url) setAvatarUrl(d.avatar_url); })
+      .catch(() => {});
+  }, []);
+
+  if (avatarUrl && !imgError) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={username}
+        className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-slate-600"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+  return (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-sm font-bold text-white ring-2 ring-slate-600">
+      {username.slice(0, 2).toUpperCase()}
+    </div>
+  );
+}
 
 const commonNav = [
   { href: "/",             label: "Dashboard",   icon: Home },
@@ -113,9 +141,7 @@ export default function Sidebar() {
       <div className="px-3 py-4 border-t border-slate-700/60 space-y-1">
         {authInfo && (
           <div className="flex items-center gap-3 px-3 py-2 mb-1">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-700">
-              <User size={14} className="text-slate-300" />
-            </div>
+            <UserAvatar username={authInfo.username} />
             <div className="min-w-0">
               <p className="truncate text-xs font-semibold text-white">{authInfo.username}</p>
               <p className="text-[10px] text-slate-500 capitalize">{authInfo.role}</p>

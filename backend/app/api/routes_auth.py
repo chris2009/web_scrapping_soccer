@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.user import User
 from app.schemas.auth_schema import LoginRequest, TokenResponse
 from app.services.auth_service import authenticate_user, create_access_token, decode_token
 
@@ -42,5 +44,14 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/me")
-def me(payload: dict = Depends(get_current_user)):
-    return {"username": payload["sub"], "role": payload["role"], "user_id": payload["user_id"]}
+def me(payload: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.scalar(select(User).where(User.id == payload["user_id"]))
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "user_id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "role": user.role,
+        "avatar_url": user.avatar_url,
+    }

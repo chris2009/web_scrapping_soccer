@@ -30,6 +30,7 @@ class UserUpdate(BaseModel):
     password: str | None = None
     role: Literal["admin", "user"] | None = None
     is_active: bool | None = None
+    avatar_url: str | None = None
 
 
 class UserRead(BaseModel):
@@ -38,5 +39,6 @@ class UserRead(BaseModel):
     email: str | None
     role: str
     is_active: bool
+    avatar_url: str | None = None
     created_at: datetime
     updated_at: datetime

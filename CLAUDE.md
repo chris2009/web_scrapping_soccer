@@ -1,134 +1,166 @@
 # Football Data App — Claude Context
 
+> **Instrucción permanente**: al final de cada sesión de trabajo, actualizar este archivo, `docs/project-memory.md` y los archivos de memoria en `~/.claude/projects/...` para que reflejen el estado real del proyecto.
+
 ## Stack
 
-- **Backend**: Python 3.13, FastAPI, SQLAlchemy 2, uvicorn
-- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS (App Router)
-- **Database**: Supabase / PostgreSQL (no local Postgres needed)
-- **ORM**: SQLAlchemy with psycopg3
-- **Data source**: football-data.org API v4 (user has registered and has `X-Auth-Token`)
-- **Environment**: Windows 11 + WSL (bash). Always use WSL/Linux commands, never PowerShell in instructions.
+- **Backend**: Python 3.13, FastAPI, SQLAlchemy 2, uvicorn, passlib[bcrypt], python-jose
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS, jose (JWT en middleware)
+- **Database**: Supabase / PostgreSQL (sin PostgreSQL local)
+- **Data source**: football-data.org API v4
+- **Auth**: JWT HS256 firmado por FastAPI, verificado por Next.js middleware con jose
+- **Entorno**: Windows 11 + WSL (bash). Siempre usar comandos WSL/Linux, nunca PowerShell.
 
-## Monorepo layout
+## Arranque
+
+```bash
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app
+bash dev.sh   # arranca backend (8000) + frontend (3000) juntos
+```
+
+## Monorepo
 
 ```
 football-data-app/
-├── backend/          # FastAPI app
+├── backend/
 │   ├── app/
-│   │   ├── api/          routes_*.py
-│   │   ├── models/       SQLAlchemy ORM models
-│   │   ├── schemas/      Pydantic schemas
-│   │   ├── scrapers/     base_scraper.py, football_data_org_scraper.py, champions_league_scraper.py
-│   │   ├── services/     ingestion_service.py, match_service.py, …
-│   │   ├── config.py     Settings (pydantic-settings, reads .env)
-│   │   ├── database.py   SQLAlchemy engine + get_db
-│   │   └── main.py       FastAPI app, CORS, routers
-│   ├── sql/          001_create_tables, 002_indexes, 003_seed, 004_cleanup_cl_pilot, 005_add_team_crest
-│   ├── scripts/      seed_database.py, run_champions_league_ingestion.py
+│   │   ├── api/          routes_health, routes_auth, routes_users,
+│   │   │                 routes_competitions, routes_teams, routes_matches, routes_ingestion
+│   │   ├── models/       country, competition, season, team (+ crest_url), venue,
+│   │   │                 data_source, match, match_event, standing, ingestion_log, user
+│   │   ├── schemas/      competition_schema, team_schema, match_schema,
+│   │   │                 auth_schema, user_schema, ingestion_schema
+│   │   ├── scrapers/     base_scraper, champions_league_scraper,
+│   │   │                 football_data_org_scraper (genérico multi-liga)
+│   │   ├── services/     auth_service, ingestion_service, match_service,
+│   │   │                 competition_service, team_service
+│   │   ├── config.py     Settings con JWT_SECRET, ADMIN_USERNAME/PASSWORD
+│   │   ├── database.py   Engine con prepare_threshold=None (fix PgBouncer)
+│   │   └── main.py       FastAPI + lifespan (seed admin al arrancar)
+│   ├── sql/
+│   │   ├── 001_create_tables.sql
+│   │   ├── 002_create_indexes.sql
+│   │   ├── 003_seed_initial_data.sql
+│   │   ├── 004_cleanup_champions_league_pilot_matches.sql
+│   │   ├── 005_add_team_crest.sql       → ALTER TABLE teams ADD COLUMN crest_url TEXT
+│   │   └── 006_create_users.sql         → tabla users con roles
 │   └── requirements.txt
 ├── frontend/
-│   ├── app/          Next.js App Router pages
-│   ├── components/   Header, Sidebar, MatchesTable, DashboardCards, …
-│   ├── lib/api.ts    All fetch calls to FastAPI
-│   └── types/        competition.ts, team.ts, match.ts
-├── docs/
-│   ├── project-memory.md
-│   └── architecture.md
-├── dev.sh            Single command to start both services (WSL)
-└── CLAUDE.md         ← this file
+│   ├── app/
+│   │   ├── layout.tsx               Root layout mínimo (html+body)
+│   │   ├── (main)/layout.tsx        Layout con sidebar (rutas protegidas)
+│   │   ├── (main)/page.tsx          Dashboard
+│   │   ├── (main)/competitions/     Catálogo con colores por liga
+│   │   ├── (main)/teams/            Tabla de equipos
+│   │   ├── (main)/matches/          Explorador con filtros + paginación + búsqueda
+│   │   ├── (main)/ingestion/        Multi-liga (solo admin)
+│   │   ├── (main)/users/            Gestión de usuarios (solo admin)
+│   │   ├── login/                   Página de login (sin sidebar)
+│   │   └── api/
+│   │       ├── auth/login/          Proxy → FastAPI /auth/login, setea cookies
+│   │       ├── auth/logout/         Limpia cookies
+│   │       ├── users/               Proxy GET/POST → FastAPI /users
+│   │       └── users/[id]/          Proxy PUT/DELETE → FastAPI /users/{id}
+│   ├── components/
+│   │   ├── Sidebar.tsx     Nav por rol, muestra username/role, logout
+│   │   ├── MatchesTable.tsx  Paginación (10/20/30/40) + búsqueda en vivo + crests
+│   │   ├── DashboardCards.tsx
+│   │   ├── StatusBadge.tsx   Punto animado para Live
+│   │   └── ...
+│   ├── lib/
+│   │   ├── api.ts          Cliente fetch a FastAPI
+│   │   └── auth.ts         getAuthInfo() — lee cookie auth-info client-side
+│   └── middleware.ts        Verifica JWT con jose, bloquea /users e /ingestion a no-admins
+├── dev.sh                   Arranque único
+├── CLAUDE.md                Este archivo
+└── docs/project-memory.md
 ```
 
-## Environment variables
+## Variables de entorno
 
 ### backend/.env
 ```
-DATABASE_URL=postgresql://postgres.<project>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
-SUPABASE_URL=https://<project>.supabase.co
-SUPABASE_KEY=<service_role_key>
-FOOTBALL_DATA_API_TOKEN=<token_from_football-data.org>
-ALLOWED_ORIGINS=http://localhost:3000
+DATABASE_URL=postgresql://postgres.<proj>:<pass>@aws-0-<region>.pooler.supabase.com:5432/postgres
+SUPABASE_URL=https://<proj>.supabase.co
+FOOTBALL_DATA_API_TOKEN=<token_football-data.org>
+JWT_SECRET=change-this-secret-in-production
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=football2024
 ```
 
 ### frontend/.env.local
 ```
 NEXT_PUBLIC_API_URL=http://localhost:8000
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=football2024
+JWT_SECRET=change-this-secret-in-production
 ```
 
-## Starting the project (single command)
+> `JWT_SECRET` debe ser idéntico en backend y frontend para que el middleware pueda verificar el JWT.
 
-From the project root in WSL:
-```bash
-bash dev.sh
+## Usuarios de prueba
+
+| Username | Password      | Rol   | Acceso |
+|----------|--------------|-------|--------|
+| `admin`  | `football2024` | admin | Todo — incluyendo Ingestion y User Management |
+
+Crear usuarios adicionales desde `http://localhost:3000/users` (admin requerido).
+
+## Flujo de autenticación
+
 ```
-This starts backend (port 8000) + frontend (port 3000) together. Ctrl+C kills both.
+Login → Next.js /api/auth/login → FastAPI POST /auth/login (bcrypt verify)
+      → JWT firmado HS256 24h
+      → cookie httpOnly auth-token (middleware lo verifica con jose)
+      → cookie readable auth-info = base64({username, role}) (Sidebar lo lee)
 
-## Backend routes
+User Management → Next.js /api/users/* → lee auth-token httpOnly → reenvía JWT
+               → FastAPI /users con Authorization: Bearer
+               → require_admin dependency verifica rol
+```
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | / | Service info |
-| GET | /health | DB connectivity check |
-| GET | /competitions | List competitions |
-| GET | /teams | List teams |
-| GET | /matches | All matches |
-| GET | /matches/upcoming | Future matches |
-| GET | /matches/results | Completed matches |
-| POST | /ingestion/champions-league/run | Ingest current snapshot |
-| POST | /ingestion/champions-league/reset-and-run | Delete stale + re-ingest |
-| POST | /ingestion/champions-league/history/run?start_season=2022&end_season=2025 | football-data.org historical |
+## Rutas del API (FastAPI)
 
-## football-data.org API
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/health` | — | Estado de conexión a DB |
+| POST | `/auth/login` | — | Login, devuelve JWT |
+| GET | `/auth/me` | JWT | Usuario actual |
+| GET | `/users` | Admin | Lista usuarios |
+| POST | `/users` | Admin | Crear usuario |
+| PUT | `/users/{id}` | Admin | Editar usuario |
+| DELETE | `/users/{id}` | Admin | Eliminar usuario |
+| GET | `/matches` | — | Partidos (limit 100, desc) |
+| POST | `/ingestion/{code}/history/run` | — | Ingestar liga |
 
-- Base URL: `https://api.football-data.org/v4/`
-- Auth header: `X-Auth-Token: <token>`
-- Free tier: recent seasons only; older seasons return 403 → skipped automatically
-- Champions League code: `CL`
-- Rate limit: 10 req/min on free tier → scraper uses 1.2s delay between requests
-- The scraper is at `backend/app/scrapers/football_data_org_scraper.py`
-- Ingestion service at `backend/app/services/ingestion_service.py`
+Códigos de liga: `CL, EL, PL, PD, BL1, SA, FL1`
 
-## Data flow
+## SQL pendientes en Supabase
 
-1. Scraper fetches matches from football-data.org and normalizes to dict format
-2. `IngestionService` resolves/creates Country → Competition → Season → Team → Venue → DataSource
-3. Matches are upserted by `(data_source_id, external_match_id)` or natural key
-4. FastAPI exposes data via REST
-5. Next.js reads from `frontend/lib/api.ts` and renders pages
+Ejecutar en orden en el SQL Editor:
+1. `001_create_tables.sql` ✅ ejecutado
+2. `002_create_indexes.sql` ✅ ejecutado
+3. `003_seed_initial_data.sql` ✅ ejecutado
+4. `004_cleanup_champions_league_pilot_matches.sql` ✅ ejecutado
+5. `005_add_team_crest.sql` — **pendiente** si no se ejecutó aún
+6. `006_create_users.sql` — **pendiente** (tabla de usuarios)
 
-## Key decisions / constraints
+## Decisiones técnicas clave
 
-- WSL may not reach Supabase direct host (IPv6 issue) → always use **Session Pooler** URL for `DATABASE_URL`
-- Frontend dates are formatted with `America/Lima` timezone to avoid SSR/CSR hydration mismatch
-- `suppressHydrationWarning` on `<html>` because browser extensions inject `class="hydrated"`
-- Frontend uses `npm overrides.postcss=8.5.12` to avoid CVE in transitive postcss
-- No local PostgreSQL; Supabase is the only DB
-- Virtual environment must be activated before running Python commands: `source venv/bin/activate`
-- Always `python -m pip`, never system pip
+| Decisión | Motivo |
+|----------|--------|
+| `prepare_threshold=None` en SQLAlchemy engine | Fix `DuplicatePreparedStatement` con Supabase PgBouncer |
+| Session Pooler URL en `DATABASE_URL` | WSL no alcanza IPv6 (host directo de Supabase) |
+| `suppressHydrationWarning` en `<html>` y `<form>` login | Extensiones de browser (Psono, etc.) inyectan atributos antes de React |
+| Timezone `America/Lima` en fechas | Evita mismatch SSR/CSR |
+| Proxy routes Next.js para user CRUD | `auth-token` es httpOnly → no legible en browser → proxy lee server-side |
+| `jose` en middleware | Compatible con Edge runtime (jsonwebtoken no lo es) |
+| Route group `(main)/` | Permite que `/login` tenga layout diferente (sin sidebar) |
 
-## Current scope status
+## Reglas de colaboración
 
-Completed:
-- Full monorepo scaffold (FastAPI + Next.js)
-- Supabase schema (SQL scripts 001–004 run successfully)
-- Champions League real ingestion via football-data.org API (token configured)
-- Generic `FootballDataOrgScraper(code)` supporting CL, EL, PL, PD, BL1, SA, FL1
-- Generic ingestion endpoint: `POST /ingestion/{code}/history/run`
-- Team crest URLs stored and displayed in frontend (run `005_add_team_crest.sql` on Supabase)
-- Frontend full redesign: dark sidebar, competition color badges, crests in match table, multi-league ingestion UI
-- `prepare_threshold=None` fix for SQLAlchemy + psycopg3 + Supabase PgBouncer
-- `dev.sh` single-command startup at project root
-- Deduplication by external_match_id and natural key
-
-Pending / next improvements:
-- Run `backend/sql/005_add_team_crest.sql` on Supabase to enable crest storage
-- Ingest Premier League, La Liga, Bundesliga via Ingestion page
-- Standings page (football-data.org `/competitions/{code}/standings` endpoint)
-- Live match polling for IN_PLAY status
-
-## Collaboration rules
-
-- Always commit after meaningful advances
-- Update `docs/project-memory.md` when decisions or architecture changes
-- Use WSL/Linux shell syntax in all instructions
-- Do not commit .env files or real credentials
-- Keep implementation focused; no speculative features
+- **Siempre** al terminar una sesión: actualizar CLAUDE.md, `docs/project-memory.md` y archivos de memoria en `~/.claude/projects/...`
+- Hacer commit de cada avance significativo con mensaje claro
+- Usar comandos WSL/Linux en todas las instrucciones
+- No commitear `.env` ni credenciales reales
+- No instalar dependencias fuera del virtualenv Python

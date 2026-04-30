@@ -1,349 +1,201 @@
 # Football Data App
 
-Fullstack monorepo for collecting, normalizing, storing and visualizing football match data.
+Fullstack analytics platform for collecting, normalizing, storing and visualizing football match data from multiple competitions.
 
-The first phase implements a Champions League pilot with:
-
-- FastAPI backend in Python.
-- SQLAlchemy connection to Supabase/PostgreSQL.
-- SQL scripts for normalized tables, indexes and seed data.
-- Champions League ingestion flow based on a verified UEFA official snapshot.
-- Next.js frontend with TypeScript, App Router and Tailwind CSS.
+- **Backend**: FastAPI + SQLAlchemy + Supabase/PostgreSQL
+- **Frontend**: Next.js 16 + TypeScript + Tailwind CSS (App Router)
+- **Data source**: football-data.org API v4
+- **Auth**: cookie-based login protecting all frontend routes
 
 ## Project structure
 
 ```text
 football-data-app/
 |-- backend/
-|   |-- app/
-|   |-- sql/
-|   |-- scripts/
-|   |-- requirements.txt
-|   |-- .env.example
-|   `-- README.md
+|   |-- app/          FastAPI application
+|   |-- sql/          Database migration scripts
+|   |-- scripts/      Utility scripts
+|   `-- requirements.txt
 |-- frontend/
-|   |-- app/
-|   |-- components/
-|   |-- lib/
-|   |-- types/
-|   |-- package.json
-|   |-- .env.example
-|   `-- README.md
+|   |-- app/          Next.js App Router pages
+|   |-- components/   UI components
+|   |-- lib/          API client
+|   `-- middleware.ts  Route protection
 |-- docs/
-|   |-- architecture.md
 |   `-- project-memory.md
-|-- .gitignore
-`-- README.md
+|-- dev.sh            Single-command startup
+`-- CLAUDE.md         AI session context
 ```
 
-## Local setup with WSL
-
-Open the repository folder in VS Code:
+## Quick start (WSL)
 
 ```bash
 cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app
-code .
+bash dev.sh
 ```
 
-## 1. Create Supabase tables
+This starts both backend (port 8000) and frontend (port 3000) together. Press `Ctrl+C` to stop both.
 
-In Supabase SQL Editor, run these scripts in order:
+---
+
+## Full setup from scratch
+
+### 1. Supabase — run SQL scripts in order
+
+Open **Supabase SQL Editor** and run each file:
 
 ```text
 backend/sql/001_create_tables.sql
 backend/sql/002_create_indexes.sql
 backend/sql/003_seed_initial_data.sql
+backend/sql/004_cleanup_champions_league_pilot_matches.sql
 ```
 
-## 2. Configure backend environment
+Then run the migration to add team crest URLs (logos):
+
+```sql
+-- backend/sql/005_add_team_crest.sql
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS crest_url TEXT;
+```
+
+### 2. Configure backend
 
 ```bash
 cd backend
 cp .env.example .env
 ```
 
-Edit `backend/.env` and set `DATABASE_URL` with your Supabase PostgreSQL connection string.
-
-For WSL, use the Supabase **Session Pooler** connection string in `DATABASE_URL`:
+Edit `backend/.env`:
 
 ```text
-DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
+DATABASE_URL=postgresql://postgres.<project>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
+SUPABASE_URL=https://<project>.supabase.co
+FOOTBALL_DATA_API_TOKEN=<your_token_from_football-data.org>
 ```
 
-Do not use the direct `db.fdnyhwywhrpuhfwfhalj.supabase.co` connection if WSL reports `Network is unreachable`, because that direct host resolves to IPv6.
+> Use the **Session Pooler** URL for `DATABASE_URL` (not the direct host) to avoid IPv6 issues in WSL.
 
-Do not put the database connection string in `SUPABASE_URL`. `SUPABASE_URL` is the project API URL:
-
-```text
-SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
-```
-
-You do not need a local PostgreSQL database for this project if you are using Supabase.
-
-To ingest historical Champions League matches from 2020 onward, configure a football-data.org API token:
-
-1. Create an account at `https://www.football-data.org/`.
-2. Open the football-data.org dashboard/client area.
-3. Copy your API token.
-4. Paste it in `backend/.env`.
-
-```text
-FOOTBALL_DATA_API_TOKEN=YOUR_FOOTBALL_DATA_ORG_TOKEN
-```
-
-The token is sent to the API as the `X-Auth-Token` header. Do not invent this value and do not commit it to git.
-
-## 3. Run backend
-
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --port 8000
-```
-
-Backend URLs:
-
-- API: `http://localhost:8000`
-- Root: `http://localhost:8000/`
-- Health: `http://localhost:8000/health`
-- Docs: `http://localhost:8000/docs`
-
-## 4. Configure frontend environment
-
-Open a second VS Code terminal:
+### 3. Configure frontend
 
 ```bash
 cd frontend
 cp .env.example .env.local
 ```
 
-Confirm this value:
+Edit `frontend/.env.local`:
 
 ```text
 NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# Login credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=football2024
 ```
 
-## 5. Run frontend
+### 4. Install dependencies (first time only)
 
 ```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend URL:
-
-```text
-http://localhost:3000
-```
-
-## Expected flow
-
-1. Run SQL scripts in Supabase.
-2. Configure `backend/.env`.
-3. Start FastAPI on `http://localhost:8000`.
-4. Start Next.js on `http://localhost:3000`.
-5. Test `GET http://localhost:8000/health`.
-6. Open the frontend ingestion page.
-7. Run the Champions League pilot ingestion.
-8. View matches in the dashboard and matches explorer.
-
-## Next steps after creating Supabase tables
-
-You already completed the database creation step if the SQL scripts ran successfully in Supabase.
-
-Continue with:
-
-```bash
-cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/backend
-cp .env.example .env
-```
-
-Then edit `backend/.env` and replace `DATABASE_URL` with your Supabase PostgreSQL connection string.
-
-For WSL, use the Session Pooler string from Supabase:
-
-```text
-DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
-```
-
-Replace `YOUR_REAL_PASSWORD` with the database password configured in Supabase.
-Replace `YOUR_REGION` with the region shown by Supabase in the pooler connection string.
-
-If you want historical Champions League data since 2020, also set:
-
-```text
-FOOTBALL_DATA_API_TOKEN=YOUR_FOOTBALL_DATA_ORG_TOKEN
-```
-
-Get that token by registering at `https://www.football-data.org/`. If your plan does not include a historical season, the API can return `403 Restricted Resource`.
-
-After that, install and run the backend:
-
-```bash
-python3 -m venv venv
+# Backend
+cd backend
+python -m venv venv
 source venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --port 8000
+pip install -r requirements.txt
+
+# Frontend
+cd ../frontend
+npm install
 ```
 
-In a second terminal, run the frontend:
+### 5. Start everything
 
 ```bash
-cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/frontend
-cp .env.example .env.local
-npm install
-npm audit
-npm run dev
+cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app
+bash dev.sh
 ```
 
-Then open:
+---
 
-- `http://localhost:8000/health`
-- `http://localhost:8000/docs`
-- `http://localhost:3000`
+## Login
 
-If `http://localhost:8000/` returns a JSON object with `service`, `status`, `health` and `docs`, the FastAPI server is running.
+Open `http://localhost:3000` — you will be redirected to the login page.
+
+| Field    | Default value   |
+|----------|-----------------|
+| Username | `admin`         |
+| Password | `football2024`  |
+
+Change these values in `frontend/.env.local` before deploying.
+
+---
+
+## Supported competitions
+
+| Code | Competition      |
+|------|-----------------|
+| CL   | Champions League |
+| EL   | Europa League   |
+| PL   | Premier League  |
+| PD   | La Liga         |
+| BL1  | Bundesliga      |
+| SA   | Serie A         |
+| FL1  | Ligue 1         |
+
+To ingest any competition, go to `http://localhost:3000/ingestion`, select the league and season range, and click **Ingest**.
+
+Or via API:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/ingestion/PL/history/run?start_season=2023&end_season=2025"
+```
+
+---
+
+## Backend API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Service info |
+| GET | `/health` | DB connectivity |
+| GET | `/competitions` | List competitions |
+| GET | `/teams` | List teams |
+| GET | `/matches` | All matches (limit 100) |
+| GET | `/matches/upcoming` | Upcoming matches |
+| GET | `/matches/recent` | Completed matches |
+| POST | `/ingestion/{code}/history/run` | Ingest any competition |
+| POST | `/ingestion/champions-league/run` | CL snapshot ingestion |
+
+Full interactive docs: `http://localhost:8000/docs`
+
+---
 
 ## WSL Python troubleshooting
 
-If `python` fails with a pyenv message like `pyenv: python: command not found`, select the installed pyenv version first:
+If `python` is not found, set pyenv version first:
 
 ```bash
 pyenv local 3.13.0
 python --version
 ```
 
-Then create the virtual environment again:
+If venv support is missing:
 
 ```bash
-cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/backend
-python -m venv venv
-source venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --port 8000
-```
-
-If `python3 -m venv venv` says that venv support is missing, install the WSL packages:
-
-```bash
-sudo apt update
-sudo apt install -y python3 python3-venv python3-pip python3-full
-```
-
-Do not install dependencies with system `pip` outside the virtual environment.
-
-## Frontend dependency security
-
-Before compiling or deploying the frontend, run:
-
-```bash
-cd /mnt/d/APRENDIZAJE/PROYECTOS/Scrapping_web/football-data-app/frontend
-npm install
-npm audit
-npm run build
-```
-
-The expected audit result is:
-
-```text
-found 0 vulnerabilities
-```
-
-If `npm run build` fails with a permissions error after mixing Windows npm and WSL npm, clean generated dependencies from WSL:
-
-```bash
-rm -rf node_modules .next
-npm install
-npm run build
+sudo apt update && sudo apt install -y python3 python3-venv python3-pip python3-full
 ```
 
 ## Supabase IPv6 troubleshooting
 
-If `/health` returns `database.configured=true` but `database.connected=false` with `Network is unreachable` and an IPv6 address, your WSL network cannot reach the direct Supabase database host.
+If `/health` returns `database.connected=false` with an IPv6 address, use the **Session Pooler** URL in `DATABASE_URL`:
 
-Fix it by using the Supabase Session Pooler:
+1. Supabase Dashboard → your project → **Connect** → **Connection pooling**
+2. Copy the **Session pooler** string (port 5432)
+3. Paste it as `DATABASE_URL` in `backend/.env`
 
-1. Open Supabase Dashboard.
-2. Go to your project.
-3. Click `Connect`.
-4. Choose `Connection pooling`.
-5. Copy the **Session pooler** connection string, port `5432`.
-6. Paste it in `backend/.env` as `DATABASE_URL`.
-
-The Session Pooler format is similar to:
-
-```text
-DATABASE_URL=postgresql://postgres.fdnyhwywhrpuhfwfhalj:YOUR_REAL_PASSWORD@aws-0-YOUR_REGION.pooler.supabase.com:5432/postgres
-```
-
-Keep this separate:
-
-```text
-SUPABASE_URL=https://fdnyhwywhrpuhfwfhalj.supabase.co
-```
-
-## Current scope
-
-Implemented only the Champions League pilot. Future competitions should be added through new scraper/source adapters that emit the same normalized match format.
-
-## Current local status
-
-Validated locally in WSL:
-
-- Supabase tables were created with the SQL scripts in `backend/sql`.
-- FastAPI is running on `http://127.0.0.1:8000`.
-- `GET /health` returns `database.connected=true`.
-- Champions League ingestion uses a UEFA official snapshot for the current 2025/2026 semi-final phase.
-- Next.js frontend is running on `http://localhost:3000`.
-- Frontend dependency audit was fixed before build: `npm audit` reports `found 0 vulnerabilities`.
-
-To refresh the pilot data after backend changes:
-
-```bash
-curl -X POST http://127.0.0.1:8000/ingestion/champions-league/run
-```
-
-If old pilot mock matches are still visible, use the reset endpoint:
-
-```bash
-curl -X POST http://127.0.0.1:8000/ingestion/champions-league/reset-and-run
-```
-
-Then refresh `http://localhost:3000`.
-
-To ingest Champions League seasons from 2020 onward using football-data.org:
-
-```bash
-curl -X POST "http://127.0.0.1:8000/ingestion/champions-league/history/run?start_season=2020&end_season=2025"
-```
-
-This requires `FOOTBALL_DATA_API_TOKEN` in `backend/.env`.
-
-If older seasons are restricted by your football-data.org plan, try the latest four season starts:
-
-```bash
-curl -X POST "http://127.0.0.1:8000/ingestion/champions-league/history/run?start_season=2022&end_season=2025"
-```
-
-The response includes `skipped_seasons` for restricted seasons.
-
-Expected result after rerunning ingestion:
-
-- Dashboard table title: `Current pilot matches`.
-- The old fake fixtures `Arsenal vs Borussia Dortmund` and `Barcelona vs Inter Milan` should disappear.
-- Current pilot matches should include Paris vs Bayern, Atletico de Madrid vs Arsenal, Arsenal vs Atletico de Madrid, and Bayern Munchen vs Paris.
-- The dashboard table now shows all current pilot matches, not only completed recent results.
+---
 
 ## Collaboration rules
 
-- Keep project context in `docs/project-memory.md`.
-- Update the memory file when decisions, setup details, implemented scope or next steps change.
-- Update the relevant README when a change affects setup, usage, architecture or workflow.
-- Commit every completed advance, change or improvement with a clear git message.
-- Use WSL/Linux shell commands in instructions, not PowerShell commands.
+- Keep project context in `docs/project-memory.md` and `CLAUDE.md`.
+- Commit every meaningful advance with a clear message.
+- Use WSL/Linux shell commands in all instructions.
+- Do not commit `.env` files or real credentials.

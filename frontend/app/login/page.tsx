@@ -78,7 +78,7 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate suppressHydrationWarning>
             {/* Username */}
             <div>
               <label htmlFor="username" className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-slate-400">

@@ -117,9 +117,22 @@ Date: 2026-04-29
 - Frontend redesigned and running on `http://localhost:3000`.
 - Multi-league backend complete; UI ingestion page supports 7 competitions.
 
+## Deploy en producción (2026-05-01)
+
+- **Frontend**: Vercel — `https://web-scrapping-soccer.vercel.app` — Root Directory = `frontend`
+- **Backend**: Railway — `https://webscrappingsoccer-production.up.railway.app` — Root Directory = `backend`
+- Login funciona con JWT compartido entre Railway (firma) y Vercel (verifica)
+- `JWT_SECRET` debe ser idéntico en ambas plataformas
+- `NEXT_PUBLIC_API_URL` en Vercel apunta a la URL de Railway (con `https://`)
+- `ALLOWED_ORIGINS` en Railway incluye la URL de Vercel
+- `DATABASE_URL` en Railway usa Session Pooler (port 5432), no Transaction Pooler
+- `middleware.ts` renombrado a `proxy.ts` + función exportada renombrada a `proxy` (Next.js 16)
+- Guía de deploy en `docs/deploy-guide.md`
+
 ## Next immediate step
 
-Run `backend/sql/005_add_team_crest.sql` on Supabase SQL Editor, then ingest other competitions from the Ingestion page (`http://localhost:3000/ingestion`).
+Ejecutar SQLs pendientes en Supabase: `005_add_team_crest.sql` y `007_add_user_avatar.sql`.
+Luego ingestar ligas desde `https://web-scrapping-soccer.vercel.app/ingestion`.
 
 Preferred WSL path:
 

@@ -135,6 +135,19 @@ User Management → Next.js /api/users/* → lee auth-token httpOnly → reenví
 
 Códigos de liga: `CL, EL, PL, PD, BL1, SA, FL1`
 
+## Deploy en producción
+
+| Servicio | Plataforma | URL |
+|---------|-----------|-----|
+| Frontend Next.js | Vercel | `https://web-scrapping-soccer.vercel.app` |
+| Backend FastAPI | Railway | `https://webscrappingsoccer-production.up.railway.app` |
+
+- **Vercel**: Root Directory = `frontend`. Variables: `NEXT_PUBLIC_API_URL` (Railway URL), `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`.
+- **Railway**: Root Directory = `backend`. Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Variables: `DATABASE_URL` (Session Pooler port 5432), `FOOTBALL_DATA_API_TOKEN`, `JWT_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ALLOWED_ORIGINS`.
+- **Crítico**: `JWT_SECRET` debe ser idéntico en Railway y Vercel. Si difieren, el login hace loop infinito.
+- Ver guía completa: `docs/deploy-guide.md`
+- `proxy.ts` (antes `middleware.ts`) — Next.js 16 renombró la convención, la función exportada también debe llamarse `proxy`.
+
 ## SQL pendientes en Supabase
 
 Ejecutar en orden en el SQL Editor:
@@ -142,8 +155,9 @@ Ejecutar en orden en el SQL Editor:
 2. `002_create_indexes.sql` ✅ ejecutado
 3. `003_seed_initial_data.sql` ✅ ejecutado
 4. `004_cleanup_champions_league_pilot_matches.sql` ✅ ejecutado
-5. `005_add_team_crest.sql` — **pendiente** si no se ejecutó aún
-6. `006_create_users.sql` — **pendiente** (tabla de usuarios)
+5. `005_add_team_crest.sql` — ejecutar si no se hizo aún
+6. `006_create_users.sql` ✅ ejecutado
+7. `007_add_user_avatar.sql` — ejecutar si no se hizo aún
 
 ## Decisiones técnicas clave
 

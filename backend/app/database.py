@@ -1,7 +1,9 @@
+import os
 from collections.abc import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 from app.config import get_settings
 
@@ -11,18 +13,28 @@ class Base(DeclarativeBase):
 
 
 def _normalize_database_url(database_url: str) -> str:
-    if database_url.startswith("postgresql://"):
-        return database_url.replace("postgresql://", "postgresql+psycopg://", 1)
-    if database_url.startswith("postgres://"):
-        return database_url.replace("postgres://", "postgresql+psycopg://", 1)
-    return database_url
+    # Strip pgbouncer query param — psycopg3 does not recognise it
+    url = database_url.replace("?pgbouncer=true", "").replace("&pgbouncer=true", "")
+    if url.endswith("?"):
+        url = url[:-1]
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+psycopg://", 1)
+    return url
 
 
 settings = get_settings()
+
+# On Vercel (serverless) use NullPool — no persistent connections between requests.
+# Vercel sets VERCEL=1 automatically in all environments.
+_is_serverless = bool(os.getenv("VERCEL"))
+
 engine = (
     create_engine(
         _normalize_database_url(settings.database_url),
-        pool_pre_ping=True,
+        poolclass=NullPool if _is_serverless else None,
+        pool_pre_ping=not _is_serverless,
         future=True,
         connect_args={"prepare_threshold": None},
     )

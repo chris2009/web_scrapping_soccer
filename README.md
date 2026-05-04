@@ -152,19 +152,100 @@ curl -X POST "http://127.0.0.1:8000/ingestion/PL/history/run?start_season=2023&e
 
 ## Backend API
 
+### Accessing the interactive docs
+
+FastAPI auto-generates interactive documentation — no extra setup needed.
+
+| Interface | Local URL | Production URL |
+|-----------|-----------|----------------|
+| **Swagger UI** | `http://localhost:8000/docs` | `https://webscrappingsoccer-production.up.railway.app/docs` |
+| **ReDoc** | `http://localhost:8000/redoc` | `https://webscrappingsoccer-production.up.railway.app/redoc` |
+| **OpenAPI JSON** | `http://localhost:8000/openapi.json` | `https://webscrappingsoccer-production.up.railway.app/openapi.json` |
+
+**How to authenticate in Swagger UI:**
+1. Start the backend (`bash dev.sh`)
+2. Open `http://localhost:8000/docs`
+3. Run `POST /auth/login` with `{"username": "admin", "password": "football2024"}`
+4. Copy the `access_token` from the response
+5. Click **Authorize** (top right lock icon) → paste `Bearer <token>` in the `bearerAuth` field
+6. All protected endpoints are now unlocked for testing
+
+**Import into Postman:** Import → paste URL `http://localhost:8000/openapi.json` → all endpoints load automatically.
+
+---
+
+### Public endpoints — no authentication required
+
+| Method | Path | Query params | Description |
+|--------|------|-------------|-------------|
+| GET | `/health` | — | Service status and DB connectivity |
+| GET | `/competitions` | — | List all competitions |
+| GET | `/competitions/{code}/standings` | — | League table from football-data.org |
+| GET | `/teams` | — | List all teams (with crest URLs) |
+| GET | `/matches` | `status`, `limit` (1–500, default 100) | All matches, optional status filter |
+| GET | `/matches/upcoming` | `limit` (1–200, default 50) | Scheduled future matches |
+| GET | `/matches/recent` | `limit` (1–200, default 50) | Completed matches, newest first |
+| GET | `/matches/by-date` | `match_date` (YYYY-MM-DD, required) | Matches on a specific date |
+| GET | `/matches/by-competition/{id}` | — | All matches for a competition |
+| GET | `/matches/by-team/{id}` | — | All matches for a team (home or away) |
+| GET | `/stats/top-teams` | `limit` (1–30, default 10) | Top teams by goals and wins |
+| GET | `/stats/goals-timeline` | `team_id` (required) | Last 20 matches goals history |
+
+### Auth endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/auth/login` | No | Returns JWT. Body: `{username, password}` |
+| GET | `/auth/me` | Bearer JWT | Returns current user info |
+
+### Ingestion endpoints (admin operation)
+
+| Method | Path | Query params | Description |
+|--------|------|-------------|-------------|
+| POST | `/ingestion/champions-league/run` | — | CL snapshot from UEFA mock data |
+| POST | `/ingestion/champions-league/history/run` | `start_season`, `end_season` (2020–2026) | CL historical ingestion |
+| POST | `/ingestion/{code}/history/run` | `start_season`, `end_season` (2000–2026) | Any league historical ingestion |
+
+Competition codes: `CL` `EL` `PL` `PD` `BL1` `SA` `FL1`
+
+```bash
+# Example: ingest Premier League seasons 2022–2024
+curl -X POST "http://localhost:8000/ingestion/PL/history/run?start_season=2022&end_season=2024"
+```
+
+### Admin-only endpoints — requires `Authorization: Bearer <admin-JWT>`
+
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Service info |
-| GET | `/health` | DB connectivity |
-| GET | `/competitions` | List competitions |
-| GET | `/teams` | List teams |
-| GET | `/matches` | All matches (limit 100) |
-| GET | `/matches/upcoming` | Upcoming matches |
-| GET | `/matches/recent` | Completed matches |
-| POST | `/ingestion/{code}/history/run` | Ingest any competition |
-| POST | `/ingestion/champions-league/run` | CL snapshot ingestion |
+| GET | `/users` | List all users |
+| POST | `/users` | Create user. Body: `{username, email, password, role}` |
+| PUT | `/users/{id}` | Update user. Body: any of `{email, password, role, is_active, avatar_url}` |
+| DELETE | `/users/{id}` | Delete user (cannot delete own account) |
 
-Full interactive docs: `http://localhost:8000/docs`
+### MatchRead response schema
+
+Every `/matches` endpoint returns objects with these fields:
+
+```json
+{
+  "id": 1,
+  "competition_name": "Premier League",
+  "season_name": "2023",
+  "home_team_name": "Arsenal",
+  "home_team_crest": "https://crests.football-data.org/57.png",
+  "away_team_name": "Chelsea",
+  "away_team_crest": "https://crests.football-data.org/61.png",
+  "match_date": "2024-03-15T15:00:00",
+  "status": "FINISHED",
+  "home_score": 2,
+  "away_score": 1,
+  "round": "28",
+  "stage": "REGULAR_SEASON",
+  "venue_name": "Emirates Stadium"
+}
+```
+
+Possible `status` values: `SCHEDULED` · `IN_PLAY` · `FINISHED` · `POSTPONED` · `CANCELLED`
 
 ---
 

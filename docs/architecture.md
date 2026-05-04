@@ -42,9 +42,9 @@ The UI includes:
 - Dashboard summary.
 - Competition list.
 - Team list.
-- Match table.
-- Filters by competition, team and date.
-- Champions League ingestion panel.
+- Match table with filters: competition, team, date, view mode (all/upcoming/recent), and status (All / Scheduled / Live / Finished / Postponed).
+- Multi-league ingestion panel (admin only).
+- User management panel (admin only).
 
 ## Database model
 

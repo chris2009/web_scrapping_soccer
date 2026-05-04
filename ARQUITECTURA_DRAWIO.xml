@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-04T00:00:00.000Z" agent="Claude Code" version="21.0.0" type="device">
+  <diagram id="arch-football-app" name="Football Data App — Arquitectura">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============================================================ -->
+        <!-- ZONA: FUENTE EXTERNA                                          -->
+        <!-- ============================================================ -->
+        <mxCell id="zone-external" value="Fuente de Datos Externa" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=13;fontStyle=1;swimlaneHead=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="280" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="football-api" value="football-data.org&#xa;API v4&#xa;&#xa;GET /competitions/{code}/matches&#xa;?season={YYYY}&#xa;Header: X-Auth-Token" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" vertex="1" parent="zone-external">
+          <mxGeometry x="20" y="50" width="240" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ZONA: BACKEND (Railway)                                       -->
+        <!-- ============================================================ -->
+        <mxCell id="zone-backend" value="Backend — FastAPI (Railway)" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="40" width="600" height="680" as="geometry" />
+        </mxCell>
+
+        <!-- Scrapers -->
+        <mxCell id="group-scrapers" value="Scrapers" style="swimlane;startSize=25;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;fontStyle=1;" vertex="1" parent="zone-backend">
+          <mxGeometry x="20" y="50" width="270" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="scraper-base" value="BaseScraper&#xa;(Abstract)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="group-scrapers">
+          <mxGeometry x="15" y="35" width="115" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="scraper-fdorg" value="FootballDataOrgScraper&#xa;fetch_matches()&#xa;rate-limit: 1.2s/req" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="group-scrapers">
+          <mxGeometry x="15" y="90" width="115" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="scraper-mock" value="ChampionsLeague&#xa;MockScraper&#xa;(datos UEFA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="group-scrapers">
+          <mxGeometry x="145" y="90" width="115" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Services -->
+        <mxCell id="group-services" value="Services" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="zone-backend">
+          <mxGeometry x="20" y="220" width="270" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-ingestion" value="IngestionService&#xa;&#xa;run_competition_history_ingestion()&#xa;_ingest_normalized_matches()&#xa;_get_or_create_*()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="group-services">
+          <mxGeometry x="15" y="35" width="240" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-auth" value="AuthService&#xa;authenticate_user() | hash_password()&#xa;create_access_token() | ensure_default_admin()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="group-services">
+          <mxGeometry x="15" y="120" width="240" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- API Routes -->
+        <mxCell id="group-routes" value="API Routes (FastAPI)" style="swimlane;startSize=25;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1;" vertex="1" parent="zone-backend">
+          <mxGeometry x="310" y="50" width="270" height="370" as="geometry" />
+        </mxCell>
+        <mxCell id="route-auth" value="POST /auth/login&#xa;GET /auth/me" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="group-routes">
+          <mxGeometry x="15" y="35" width="240" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="route-matches" value="GET /matches&#xa;(filtros: fecha, liga, equipo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="group-routes">
+          <mxGeometry x="15" y="85" width="240" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="route-competitions" value="GET /competitions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="group-routes">
+          <mxGeometry x="15" y="135" width="240" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="route-teams" value="GET /teams" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="group-routes">
+          <mxGeometry x="15" y="180" width="240" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="route-stats" value="GET /stats/top-teams&#xa;GET /stats/goals-timeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="group-routes">
+          <mxGeometry x="15" y="225" width="240" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="route-ingestion" value="POST /ingestion/{code}/history/run&#xa;[solo admin]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="group-routes">
+          <mxGeometry x="15" y="275" width="240" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="route-users" value="GET/POST /users [solo admin]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="group-routes">
+          <mxGeometry x="15" y="325" width="240" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Models -->
+        <mxCell id="group-models" value="SQLAlchemy Models / Pydantic Schemas" style="swimlane;startSize=25;fillColor=#fff;strokeColor=#666;fontSize=11;fontStyle=1;" vertex="1" parent="zone-backend">
+          <mxGeometry x="20" y="440" width="560" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="model-list" value="Competition | Season | Team | Country | Venue | Match | MatchEvent | Standing | IngestionLog | User | DataSource" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=10;" vertex="1" parent="group-models">
+          <mxGeometry x="10" y="30" width="540" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Config/DB -->
+        <mxCell id="backend-config" value="Config (Settings)&#xa;.env → Pydantic BaseSettings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="zone-backend">
+          <mxGeometry x="20" y="530" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-db" value="database.py&#xa;SQLAlchemy Engine&#xa;prepare_threshold=None (PgBouncer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="zone-backend">
+          <mxGeometry x="240" y="530" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- main.py -->
+        <mxCell id="backend-main" value="main.py&#xa;FastAPI app + CORS + Lifespan&#xa;ensure_default_admin() on startup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="zone-backend">
+          <mxGeometry x="440" y="530" width="145" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- JWT middleware backend -->
+        <mxCell id="backend-jwt" value="JWT HS256 Dependency&#xa;get_current_user()&#xa;require_admin()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="zone-backend">
+          <mxGeometry x="310" y="430" width="270" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ZONA: BASE DE DATOS (Supabase)                               -->
+        <!-- ============================================================ -->
+        <mxCell id="zone-db" value="Base de Datos — Supabase PostgreSQL" style="swimlane;startSize=30;fillColor=#f8cecc;strokeColor=#b85450;fontColor=#333333;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="40" width="540" height="680" as="geometry" />
+        </mxCell>
+
+        <!-- Tables -->
+        <mxCell id="db-competitions" value="competitions&#xa;id | name (UQ) | slug (UQ) | region" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="20" y="50" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="db-seasons" value="seasons&#xa;id | competition_id(FK) | name | year_start | year_end" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="20" y="125" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="db-teams" value="teams&#xa;id | name | slug(UQ) | country_id(FK) | crest_url" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="20" y="200" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="db-countries" value="countries&#xa;id | name(UQ) | code" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="20" y="275" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="db-venues" value="venues&#xa;id | name | city | country_id(FK)" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="20" y="345" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="db-datasources" value="data_sources&#xa;id | name(UQ) | base_url | is_official" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="20" y="415" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="db-users" value="users&#xa;id | username(UQ) | email(UQ) | password_hash&#xa;role CHECK('admin','user') | is_active" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="20" y="485" width="240" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Matches (central) -->
+        <mxCell id="db-matches" value="MATCHES (tabla central)&#xa;id | competition_id(FK) | season_id(FK)&#xa;home_team_id(FK) | away_team_id(FK)&#xa;venue_id(FK) | data_source_id(FK)&#xa;match_date | round | stage | status&#xa;home_score | away_score&#xa;external_match_id | source_url&#xa;UNIQUE(comp,season,home,away,date)&#xa;UNIQUE(data_source_id, external_match_id)" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="280" y="50" width="240" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- Match Events -->
+        <mxCell id="db-events" value="match_events&#xa;id | match_id(FK CASCADE)&#xa;team_id(FK) | minute&#xa;event_type | player_name" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="280" y="270" width="240" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Standings -->
+        <mxCell id="db-standings" value="standings&#xa;id | competition_id(FK) | season_id(FK)&#xa;team_id(FK) | played | won | drawn | lost&#xa;goals_for | goals_against | points&#xa;UNIQUE(competition_id, season_id, team_id)" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="280" y="370" width="240" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Ingestion Logs -->
+        <mxCell id="db-logs" value="ingestion_logs (auditoría)&#xa;id | competition_id(FK) | data_source_id(FK)&#xa;status | records_found&#xa;records_inserted | records_updated&#xa;error_message | started_at | finished_at" style="shape=table;startSize=30;container=0;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="280" y="490" width="240" height="105" as="geometry" />
+        </mxCell>
+
+        <!-- Pooler note -->
+        <mxCell id="db-pooler" value="Conexión via PgBouncer&#xa;Session Pooler :5432 (Railway)&#xa;Transaction Pooler :6543 (Vercel serverless)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="zone-db">
+          <mxGeometry x="20" y="610" width="500" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ZONA: FRONTEND (Vercel)                                       -->
+        <!-- ============================================================ -->
+        <mxCell id="zone-frontend" value="Frontend — Next.js 16 App Router (Vercel)" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="340" height="440" as="geometry" />
+        </mxCell>
+
+        <!-- Middleware -->
+        <mxCell id="fe-middleware" value="proxy.ts (Middleware Edge)&#xa;&#xa;✓ Verifica JWT en cada request&#xa;✓ Redirige a /login si inválido&#xa;✓ Bloquea /ingestion y /users&#xa;  si role != 'admin'" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="zone-frontend">
+          <mxGeometry x="20" y="50" width="300" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Pages -->
+        <mxCell id="group-pages" value="Pages (App Router)" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="zone-frontend">
+          <mxGeometry x="20" y="160" width="300" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="page-login" value="/login — Pública" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="group-pages">
+          <mxGeometry x="10" y="35" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="page-dashboard" value="/ — Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="group-pages">
+          <mxGeometry x="155" y="35" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="page-matches" value="/matches — Partidos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="group-pages">
+          <mxGeometry x="10" y="75" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="page-competitions" value="/competitions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="group-pages">
+          <mxGeometry x="155" y="75" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="page-teams" value="/teams — Equipos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="group-pages">
+          <mxGeometry x="10" y="115" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="page-ingestion" value="/ingestion [admin]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="group-pages">
+          <mxGeometry x="155" y="115" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="page-users" value="/users [admin]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="group-pages">
+          <mxGeometry x="10" y="155" width="130" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lib -->
+        <mxCell id="fe-lib" value="lib/api.ts — HTTP client hacia FastAPI&#xa;lib/auth.ts — Lee cookie auth-info&#xa;Cookies: auth-token (httpOnly JWT) + auth-info (base64)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="zone-frontend">
+          <mxGeometry x="20" y="375" width="300" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USUARIO FINAL                                                 -->
+        <!-- ============================================================ -->
+        <mxCell id="user-admin" value="Admin&#xa;(navegador)" style="shape=mxgraph.general.user;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;verticalLabelPosition=bottom;" vertex="1" parent="1">
+          <mxGeometry x="80" y="780" width="60" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="user-readonly" value="Usuario&#xa;(solo lectura)" style="shape=mxgraph.general.user;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;verticalLabelPosition=bottom;" vertex="1" parent="1">
+          <mxGeometry x="220" y="780" width="60" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- CONEXIONES / FLECHAS                                          -->
+        <!-- ============================================================ -->
+
+        <!-- Usuario → Frontend -->
+        <mxCell id="e-user-admin-fe" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.2;entryY=1;entryDx=0;entryDy=0;" edge="1" source="user-admin" target="zone-frontend" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-user-ro-fe" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" source="user-readonly" target="zone-frontend" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend → Backend -->
+        <mxCell id="e-fe-be" value="REST API (JSON / HTTPS)&#xa;Bearer JWT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#9673a6;fontColor=#9673a6;fontStyle=1;" edge="1" source="zone-frontend" target="zone-backend" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Backend → DB -->
+        <mxCell id="e-be-db" value="SQLAlchemy ORM&#xa;PostgreSQL TCP :5432" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#b85450;fontColor=#b85450;fontStyle=1;" edge="1" source="zone-backend" target="zone-db" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- External API → Scraper -->
+        <mxCell id="e-ext-scraper" value="HTTP GET&#xa;X-Auth-Token&#xa;1.2s delay" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;strokeColor=#d79b00;fontColor=#d79b00;fontStyle=1;" edge="1" source="zone-external" target="zone-backend" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Scraper → Ingestion Service (interna) -->
+        <mxCell id="e-scraper-svc" value="lista[dict] normalizada" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;strokeColor=#d79b00;fontSize=10;" edge="1" source="scraper-fdorg" target="svc-ingestion" parent="zone-backend">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Route Ingestion → Service -->
+        <mxCell id="e-route-svc" value="llama" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;strokeColor=#9673a6;fontSize=10;" edge="1" source="route-ingestion" target="svc-ingestion" parent="zone-backend">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- LEYENDA                                                        -->
+        <!-- ============================================================ -->
+        <mxCell id="legend" value="Leyenda" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="900" width="380" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="legend">
+          <mxGeometry x="15" y="35" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1t" value="Fuente externa / Tabla central (matches)" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="legend">
+          <mxGeometry x="55" y="35" width="300" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="legend">
+          <mxGeometry x="15" y="65" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2t" value="Configuración / Backend core" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="legend">
+          <mxGeometry x="55" y="65" width="300" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="legend">
+          <mxGeometry x="15" y="95" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3t" value="Scrapers (ingesta de datos)" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="legend">
+          <mxGeometry x="55" y="95" width="300" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="legend">
+          <mxGeometry x="15" y="125" width="30" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4t" value="Recursos solo admin / Tablas de datos" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="legend">
+          <mxGeometry x="55" y="125" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- NOTA: SCRAPING MANUAL (sin scheduler)                         -->
+        <!-- ============================================================ -->
+        <mxCell id="note-manual" value="⚠ Scraping: Manual / On-Demand&#xa;NO hay cron job ni scheduler automático.&#xa;Un admin dispara la ingesta desde /ingestion.&#xa;Rate limit: 1 temporada cada ~1.2 segundos." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="780" width="320" height="90" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

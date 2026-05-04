@@ -103,6 +103,10 @@ Completed:
 - Frontend fully redesigned: dark sidebar, competition color badges, team crests in match table, multi-league ingestion UI.
 - `dev.sh` at project root starts backend + frontend together with one command.
 
+- Status filter added to `/matches` page: pill buttons (All / Scheduled / Live / Finished / Postponed). Uses `GET /matches?status=` for the general endpoint; client-side filtering for specific endpoints (by-date, by-team, by-competition, upcoming, recent). Clear button resets the filter.
+- Full architecture documentation added: `ARQUITECTURA_MANUAL.md` (detailed manual in Spanish, 12 sections including API catalog with all endpoints, params and response schemas) and `ARQUITECTURA_DRAWIO.xml` (draw.io diagram with all layers).
+- `README.md` expanded with complete API catalog organized by auth level, Swagger UI access instructions and MatchRead response schema.
+
 Pending:
 
 - Run `backend/sql/005_add_team_crest.sql` on Supabase to enable crest URL storage.
@@ -111,11 +115,11 @@ Pending:
 
 ## Latest validated milestone
 
-Date: 2026-04-29
+Date: 2026-05-04
 
-- Real football-data.org API ingestion confirmed working (Champions League history).
-- Frontend redesigned and running on `http://localhost:3000`.
-- Multi-league backend complete; UI ingestion page supports 7 competitions.
+- Status filter (Scheduled / Live / Finished / Postponed) added to matches explorer.
+- Complete architecture manual (`ARQUITECTURA_MANUAL.md`) and draw.io diagram (`ARQUITECTURA_DRAWIO.xml`) created.
+- Full API catalog documented in README and manual, including Swagger UI access steps.
 
 ## Deploy en producción (2026-05-01)
 

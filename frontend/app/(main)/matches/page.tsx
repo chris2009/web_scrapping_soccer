@@ -16,6 +16,14 @@ import type { Team } from "@/types/team";
 
 type ViewMode = "all" | "upcoming" | "recent";
 
+const STATUS_OPTIONS = [
+  { value: "",          label: "All statuses", dot: ""               },
+  { value: "SCHEDULED", label: "Scheduled",    dot: "bg-sky-400"     },
+  { value: "IN_PLAY",   label: "Live",          dot: "bg-red-500"     },
+  { value: "FINISHED",  label: "Finished",     dot: "bg-emerald-500" },
+  { value: "POSTPONED", label: "Postponed",    dot: "bg-amber-400"   },
+] as const;
+
 export default function MatchesPage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -24,6 +32,7 @@ export default function MatchesPage() {
   const [teamId, setTeamId] = useState("");
   const [date, setDate] = useState("");
   const [mode, setMode] = useState<ViewMode>("all");
+  const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -45,6 +54,7 @@ export default function MatchesPage() {
     setError("");
     try {
       let data: Match[];
+      const usesSpecificEndpoint = date || teamId || competitionId || mode === "upcoming" || mode === "recent";
       if (date) {
         data = await api.matchesByDate(date);
       } else if (teamId) {
@@ -56,7 +66,10 @@ export default function MatchesPage() {
       } else if (mode === "recent") {
         data = await api.recentResults();
       } else {
-        data = await api.matches();
+        data = await api.matches(statusFilter || undefined);
+      }
+      if (statusFilter && usesSpecificEndpoint) {
+        data = data.filter((m) => m.status?.toUpperCase() === statusFilter);
       }
       setMatches(data);
     } catch (err) {
@@ -71,6 +84,7 @@ export default function MatchesPage() {
     setTeamId("");
     setDate("");
     setMode("all");
+    setStatusFilter("");
   }
 
   return (
@@ -92,6 +106,7 @@ export default function MatchesPage() {
             <DateFilter value={date} onChange={setDate} />
           </div>
           <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">View</span>
             {(["all", "upcoming", "recent"] as ViewMode[]).map((item) => (
               <button
                 key={item}
@@ -106,6 +121,34 @@ export default function MatchesPage() {
                 {item}
               </button>
             ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Status</span>
+            {STATUS_OPTIONS.map(({ value, label, dot }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setStatusFilter(value)}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
+                  statusFilter === value
+                    ? "bg-ink text-white"
+                    : "border border-line bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {dot && (
+                  <span
+                    className={`inline-block h-2 w-2 rounded-full flex-shrink-0 ${
+                      statusFilter === value ? "bg-white" : dot
+                    }`}
+                  />
+                )}
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
             <button
               type="button"
               onClick={loadMatches}

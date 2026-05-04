@@ -17,11 +17,11 @@ import type { Team } from "@/types/team";
 type ViewMode = "all" | "upcoming" | "recent";
 
 const STATUS_OPTIONS = [
-  { value: "",          label: "All statuses", dot: ""               },
-  { value: "SCHEDULED", label: "Scheduled",    dot: "bg-sky-400"     },
-  { value: "IN_PLAY",   label: "Live",          dot: "bg-red-500"     },
-  { value: "FINISHED",  label: "Finished",     dot: "bg-emerald-500" },
-  { value: "POSTPONED", label: "Postponed",    dot: "bg-amber-400"   },
+  { value: "",           label: "All statuses", dot: ""               },
+  { value: "scheduled",  label: "Scheduled",    dot: "bg-sky-400"     },
+  { value: "live",       label: "Live",         dot: "bg-red-500"     },
+  { value: "completed",  label: "Completed",    dot: "bg-emerald-500" },
+  { value: "postponed",  label: "Postponed",    dot: "bg-amber-400"   },
 ] as const;
 
 export default function MatchesPage() {
@@ -69,7 +69,7 @@ export default function MatchesPage() {
         data = await api.matches(statusFilter || undefined);
       }
       if (statusFilter && usesSpecificEndpoint) {
-        data = data.filter((m) => m.status?.toUpperCase() === statusFilter);
+        data = data.filter((m) => m.status === statusFilter);
       }
       setMatches(data);
     } catch (err) {
